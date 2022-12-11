@@ -1,26 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
+import { ormConfig } from './orm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LivesModule } from './lives/lives.module';
-
+import { MembersModule } from './members/members.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: 3306,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      entities: [],
-      synchronize: true,
-    }),
-    ConfigModule.forRoot(),
-    LivesModule],
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({ useFactory: ormConfig }),
+    MembersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
