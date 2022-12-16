@@ -4,8 +4,10 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MembersModule } from './members/members.module';
-import { Member } from './members/member.entity';
+import { UsersModule } from './users/users.module';
+import { User } from './users/user.entity';
+import { MeetingRoomsModule } from './meeting-rooms/meeting-rooms.module';
+import { MeetingRoom } from './meeting-rooms/meeting-room.entity';
 
 @Module({
   imports: [
@@ -17,10 +19,11 @@ import { Member } from './members/member.entity';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [Member],
-      synchronize: true,
+      entities: [User, MeetingRoom],
+      synchronize: false,
     }),
-    MembersModule,
+    UsersModule,
+    MeetingRoomsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
