@@ -8,6 +8,10 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { MeetingRoomsModule } from './meeting-rooms/meeting-rooms.module';
 import { MeetingRoom } from './meeting-rooms/meeting-room.entity';
+import { LiveCommercesModule } from './live-commerces/live-commerces.module';
+import { LiveCommerce } from './live-commerces/live-commerce.entity';
+import { JapanModule } from './japan/japan.module';
+import { Japan } from './japan/japan.entity';
 
 @Module({
   imports: [
@@ -19,11 +23,13 @@ import { MeetingRoom } from './meeting-rooms/meeting-room.entity';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [User, MeetingRoom],
+      entities: [User, MeetingRoom, LiveCommerce, Japan],
       synchronize: false,
     }),
     UsersModule,
     MeetingRoomsModule,
+    LiveCommercesModule,
+    JapanModule,
   ],
   controllers: [AppController],
   providers: [AppService],
