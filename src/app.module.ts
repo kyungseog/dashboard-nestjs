@@ -4,8 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { User } from './users/user.entity';
+import { ManagersModule } from './managers/managers.module';
+import { Manager } from './managers/manager.entity';
 import { MeetingRoomsModule } from './meeting-rooms/meeting-rooms.module';
 import { MeetingRoom } from './meeting-rooms/meeting-room.entity';
 import { LiveCommercesModule } from './live-commerces/live-commerces.module';
@@ -23,10 +23,10 @@ import { Japan } from './japan/japan.entity';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [User, MeetingRoom, LiveCommerce, Japan],
-      synchronize: false,
+      entities: [Manager, MeetingRoom, LiveCommerce, Japan],
+      synchronize: true,
     }),
-    UsersModule,
+    ManagersModule,
     MeetingRoomsModule,
     LiveCommercesModule,
     JapanModule,

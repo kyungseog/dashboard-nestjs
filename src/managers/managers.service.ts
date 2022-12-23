@@ -2,22 +2,22 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './user.entity';
+import { CreateManagerDto } from './dto/create-user.dto';
+import { Manager } from './manager.entity';
 
 @Injectable()
-export class UsersService {
+export class ManagersService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(Manager)
+    private userRepository: Repository<Manager>,
   ) {}
 
-  getAllUsers(): Promise<User[]> {
+  getAllUsers(): Promise<Manager[]> {
     return this.userRepository.find();
   }
 
-  async createUser(createUserDto: CreateUserDto) {
-    const { id, partname, position, name, introduction } = createUserDto;
+  async createUser(createManagerDto: CreateManagerDto) {
+    const { id, partname, position, name, introduction } = createManagerDto;
     const user = this.userRepository.create({
       id,
       partname,
@@ -29,7 +29,7 @@ export class UsersService {
     return user;
   }
 
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: string): Promise<Manager> {
     const found = await this.userRepository.findOneBy({ id: id });
     if (!found) {
       throw new NotFoundException(`can't find User with id ${id}`);
@@ -37,7 +37,7 @@ export class UsersService {
     return found;
   }
 
-  async updateUserById(id: string, introduction: string): Promise<User> {
+  async updateUserById(id: string, introduction: string): Promise<Manager> {
     const member = await this.getUserById(id);
     member.introduction = introduction;
     return member;
