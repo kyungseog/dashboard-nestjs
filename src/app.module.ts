@@ -5,13 +5,13 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ManagersModule } from './managers/managers.module';
-import { Manager } from './managers/manager.entity';
+import { Manager } from './entities/manager.entity';
 import { MeetingRoomsModule } from './meeting-rooms/meeting-rooms.module';
-import { MeetingRoom } from './meeting-rooms/meeting-room.entity';
+import { MeetingRoom } from './entities/meeting-room.entity';
 import { LiveCommercesModule } from './live-commerces/live-commerces.module';
-import { LiveCommerce } from './live-commerces/live-commerce.entity';
+import { LiveCommerce } from './entities/live-commerce.entity';
 import { JapanModule } from './japan/japan.module';
-import { Japan } from './japan/japan.entity';
+import { Japan } from './entities/japan.entity';
 
 @Module({
   imports: [

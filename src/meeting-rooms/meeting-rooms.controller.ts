@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { MeetingRoom } from './meeting-room.entity';
+import { MeetingRoom } from '../entities/meeting-room.entity';
 import { MeetingRoomsService } from './meeting-rooms.service';
 
 @Controller('meeting-rooms')
