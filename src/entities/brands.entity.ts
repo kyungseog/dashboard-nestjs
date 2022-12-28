@@ -1,5 +1,6 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { BrandType } from './enums';
+import { Managers } from './managers.entity';
 
 @Entity()
 export class Brands extends BaseEntity {
@@ -12,7 +13,7 @@ export class Brands extends BaseEntity {
   @Column({ type: 'enum', enum: BrandType })
   type: BrandType;
 
-  @Column('char')
+  @ManyToOne(() => Managers, (manager_id) => 'char')
   manager_id: string;
 
   @Column('int')
