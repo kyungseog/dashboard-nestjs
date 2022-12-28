@@ -1,20 +1,20 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class Manager extends BaseEntity {
-  @PrimaryColumn()
+export class Managers extends BaseEntity {
+  @PrimaryColumn('char')
   id: string;
 
-  @Column()
+  @Column('char')
   password: string;
 
-  @Column()
+  @Column('char')
   partname: string;
 
-  @Column()
+  @Column('char')
   position: string;
 
-  @Column()
+  @Column('char')
   name: string;
 
   @Column('text')

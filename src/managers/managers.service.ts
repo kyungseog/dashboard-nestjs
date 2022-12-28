@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateManagerDto } from './dto/create-user.dto';
-import { Manager } from '../entities/manager.entity';
+import { Manager } from '../entities/managers.entity';
 
 @Injectable()
 export class ManagersService {

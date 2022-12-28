@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ManagersService } from './managers.service';
-import { Manager } from '../entities/manager.entity';
+import { Manager } from '../entities/managers.entity';
 import { CreateManagerDto } from './dto/create-user.dto';
 
 @Controller('manager')
