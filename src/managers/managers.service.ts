@@ -3,23 +3,25 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CreateManagerDto } from './dto/create-user.dto';
-import { Manager } from '../entities/managers.entity';
+import { Managers } from '../entities/managers.entity';
 
 @Injectable()
 export class ManagersService {
   constructor(
-    @InjectRepository(Manager)
-    private userRepository: Repository<Manager>,
+    @InjectRepository(Managers)
+    private userRepository: Repository<Managers>,
   ) {}
 
-  getAllUsers(): Promise<Manager[]> {
+  getAllUsers(): Promise<Managers[]> {
     return this.userRepository.find();
   }
 
   async createUser(createManagerDto: CreateManagerDto) {
-    const { id, partname, position, name, introduction } = createManagerDto;
+    const { id, password, partname, position, name, introduction } =
+      createManagerDto;
     const user = this.userRepository.create({
       id,
+      password,
       partname,
       position,
       name,
@@ -29,7 +31,7 @@ export class ManagersService {
     return user;
   }
 
-  async getUserById(id: string): Promise<Manager> {
+  async getUserById(id: string): Promise<Managers> {
     const found = await this.userRepository.findOneBy({ id: id });
     if (!found) {
       throw new NotFoundException(`can't find User with id ${id}`);
@@ -37,7 +39,7 @@ export class ManagersService {
     return found;
   }
 
-  async updateUserById(id: string, introduction: string): Promise<Manager> {
+  async updateUserById(id: string, introduction: string): Promise<Managers> {
     const member = await this.getUserById(id);
     member.introduction = introduction;
     return member;

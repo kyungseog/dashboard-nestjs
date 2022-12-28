@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JapanController } from './japan.controller';
-import { Japan } from '../entities/japan.entity';
+import { JapanUsers } from '../entities/japan-users.entity';
 import { JapanService } from './japan.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Japan])],
+  imports: [TypeOrmModule.forFeature([JapanUsers])],
   controllers: [JapanController],
   providers: [JapanService],
 })

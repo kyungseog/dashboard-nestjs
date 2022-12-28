@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ManagersService } from './managers.service';
-import { Manager } from '../entities/managers.entity';
+import { Managers } from '../entities/managers.entity';
 import { CreateManagerDto } from './dto/create-user.dto';
 
 @Controller('manager')
@@ -8,17 +8,17 @@ export class ManagersController {
   constructor(private managersService: ManagersService) {}
 
   @Get()
-  getAllUser(): Promise<Manager[]> {
+  getAllUser(): Promise<Managers[]> {
     return this.managersService.getAllUsers();
   }
 
   @Post()
-  createUser(@Body() createManagerDto: CreateManagerDto): Promise<Manager> {
+  createUser(@Body() createManagerDto: CreateManagerDto): Promise<Managers> {
     return this.managersService.createUser(createManagerDto);
   }
 
   @Get('/:id')
-  getUserByid(@Param('id') id: string): Promise<Manager> {
+  getUserByid(@Param('id') id: string): Promise<Managers> {
     return this.managersService.getUserById(id);
   }
 
@@ -26,7 +26,7 @@ export class ManagersController {
   updateUserById(
     @Param('id') id: string,
     @Body('introduction') introduction: string,
-  ): Promise<Manager> {
+  ): Promise<Managers> {
     return this.managersService.updateUserById(id, introduction);
   }
 }

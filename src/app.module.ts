@@ -5,13 +5,9 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ManagersModule } from './managers/managers.module';
-import { Manager } from './entities/managers.entity';
 import { MeetingRoomsModule } from './meeting-rooms/meeting-rooms.module';
-import { MeetingRoom } from './entities/meeting-rooms.entity';
 import { LiveCommercesModule } from './live-commerces/live-commerces.module';
-import { LiveCommerce } from './entities/live-commerces.entity';
 import { JapanModule } from './japan/japan.module';
-import { Japan } from './entities/japan.entity';
 
 @Module({
   imports: [
@@ -23,7 +19,7 @@ import { Japan } from './entities/japan.entity';
       username: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      entities: [Manager, MeetingRoom, LiveCommerce, Japan],
+      entities: ['entities/*.entity.ts'],
       synchronize: true,
     }),
     ManagersModule,

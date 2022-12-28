@@ -6,7 +6,7 @@ export class Commissions extends BaseEntity {
   @PrimaryColumn('char')
   id: string;
 
-  @Column({ type: 'enum', enum: CommissionGrade })
+  @PrimaryColumn({ type: 'enum', enum: CommissionGrade })
   grade: CommissionGrade;
 
   @Column('float')
