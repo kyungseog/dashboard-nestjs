@@ -2,24 +2,24 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { CreateManagerDto } from './dto/create-user.dto';
+import { CreateManagerDto } from './dto/create-manager.dto';
 import { Managers } from '../entities/managers.entity';
 
 @Injectable()
 export class ManagersService {
   constructor(
     @InjectRepository(Managers)
-    private userRepository: Repository<Managers>,
+    private managerRepository: Repository<Managers>,
   ) {}
 
-  getAllUsers(): Promise<Managers[]> {
-    return this.userRepository.find();
+  getAllManagers(): Promise<Managers[]> {
+    return this.managerRepository.find();
   }
 
-  async createUser(createManagerDto: CreateManagerDto) {
+  async createManager(createManagerDto: CreateManagerDto) {
     const { id, password, partname, position, name, introduction } =
       createManagerDto;
-    const user = this.userRepository.create({
+    const manager = this.managerRepository.create({
       id,
       password,
       partname,
@@ -27,20 +27,20 @@ export class ManagersService {
       name,
       introduction,
     });
-    await this.userRepository.save(user);
-    return user;
+    await this.managerRepository.save(manager);
+    return manager;
   }
 
-  async getUserById(id: string): Promise<Managers> {
-    const found = await this.userRepository.findOneBy({ id: id });
+  async getManagerById(id: string): Promise<Managers> {
+    const found = await this.managerRepository.findOneBy({ id: id });
     if (!found) {
-      throw new NotFoundException(`can't find User with id ${id}`);
+      throw new NotFoundException(`can't find Manager with id ${id}`);
     }
     return found;
   }
 
-  async updateUserById(id: string, introduction: string): Promise<Managers> {
-    const member = await this.getUserById(id);
+  async updateManagerById(id: string, introduction: string): Promise<Managers> {
+    const member = await this.getManagerById(id);
     member.introduction = introduction;
     return member;
   }

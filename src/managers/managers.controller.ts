@@ -1,32 +1,32 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ManagersService } from './managers.service';
 import { Managers } from '../entities/managers.entity';
-import { CreateManagerDto } from './dto/create-user.dto';
+import { CreateManagerDto } from './dto/create-manager.dto';
 
 @Controller('manager')
 export class ManagersController {
   constructor(private managersService: ManagersService) {}
 
   @Get()
-  getAllUser(): Promise<Managers[]> {
-    return this.managersService.getAllUsers();
+  getAllManager(): Promise<Managers[]> {
+    return this.managersService.getAllManagers();
   }
 
   @Post()
-  createUser(@Body() createManagerDto: CreateManagerDto): Promise<Managers> {
-    return this.managersService.createUser(createManagerDto);
+  createManager(@Body() createManagerDto: CreateManagerDto): Promise<Managers> {
+    return this.managersService.createManager(createManagerDto);
   }
 
   @Get('/:id')
-  getUserByid(@Param('id') id: string): Promise<Managers> {
-    return this.managersService.getUserById(id);
+  getManagerByid(@Param('id') id: string): Promise<Managers> {
+    return this.managersService.getManagerById(id);
   }
 
   @Patch('/:id/introduction')
-  updateUserById(
+  updateManagerById(
     @Param('id') id: string,
     @Body('introduction') introduction: string,
   ): Promise<Managers> {
-    return this.managersService.updateUserById(id, introduction);
+    return this.managersService.updateManagerById(id, introduction);
   }
 }
