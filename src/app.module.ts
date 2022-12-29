@@ -9,7 +9,7 @@ import { MeetingRoomsModule } from './meeting-rooms/meeting-rooms.module';
 import { LiveCommercesModule } from './live-commerces/live-commerces.module';
 import { JapanModule } from './japan/japan.module';
 import { KoreaModule } from './korea/korea.module';
-import { AccountModule } from './account/account.module';
+import { AccountingModule } from './accounting/accounting.module';
 import { ormConfig } from './orm.config';
 
 @Module({
@@ -21,7 +21,7 @@ import { ormConfig } from './orm.config';
     LiveCommercesModule,
     JapanModule,
     KoreaModule,
-    AccountModule,
+    AccountingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
