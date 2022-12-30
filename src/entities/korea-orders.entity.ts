@@ -15,10 +15,10 @@ export class KoreaOrders extends BaseEntity {
   @Column('datetime')
   payment_date: Date;
 
-  @Column('datetime')
+  @Column('datetime', { nullable: true })
   delivery_date: Date;
 
-  @Column('char', { length: 10 })
+  @Column('varchar', { length: 50 })
   product_variant_id: string;
 
   @Column('int')
@@ -36,6 +36,6 @@ export class KoreaOrders extends BaseEntity {
   @Column({ type: 'enum', enum: OrderStatus })
   status: OrderStatus;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   user_id: string;
 }
