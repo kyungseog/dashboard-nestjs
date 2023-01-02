@@ -11,10 +11,10 @@ export class MeetingRooms extends BaseEntity {
   @Column('datetime')
   end_date: Date;
 
-  @Column('char')
+  @Column('char', { length: 20 })
   creator: string;
 
-  @Column('char')
+  @Column('char', { length: 10 })
   room_no: string;
 
   @Column('text')

@@ -13,5 +13,5 @@ export class Suppliers extends BaseEntity {
   name: string;
 
   @Column({ type: 'enum', enum: SupplierStatus })
-  status: SupplierStatus;
+  status_id: SupplierStatus;
 }

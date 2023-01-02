@@ -14,6 +14,6 @@ export class Costs extends BaseEntity {
   @Column('int')
   actual_cost: number;
 
-  @Column('datetime')
+  @Column('date')
   issued_at: Date;
 }

@@ -9,8 +9,8 @@ export class Weather extends BaseEntity {
   @PrimaryColumn('char', { length: 10 })
   city: string;
 
-  @PrimaryColumn('datetime')
-  created_at: Date;
+  @PrimaryColumn('date')
+  date: Date;
 
   @Column('float')
   temperature_min: number;
@@ -18,18 +18,18 @@ export class Weather extends BaseEntity {
   @Column('float')
   temperature_max: number;
 
-  @Column('int')
+  @Column('int', { nullable: true })
   estimate_am: number;
 
-  @Column('int')
+  @Column('int', { nullable: true })
   estimate_pm: number;
 
-  @Column('float')
+  @Column('float', { nullable: true })
   rain: number;
 
-  @Column('float')
+  @Column('float', { nullable: true })
   snow: number;
 
-  @Column('char', { length: 10 })
-  status: string;
+  @Column('char', { nullable: true, length: 10 })
+  status_name: string;
 }

@@ -1,5 +1,4 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { OrderStatus } from './enums';
 
 @Entity()
 export class JapanOrders extends BaseEntity {
@@ -33,8 +32,8 @@ export class JapanOrders extends BaseEntity {
   @Column('int')
   quantity: number;
 
-  @Column({ type: 'enum', enum: OrderStatus })
-  status: OrderStatus;
+  @Column('varchar')
+  status_id: string;
 
   @Column('varchar')
   user_id: string;

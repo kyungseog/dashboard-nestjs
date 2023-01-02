@@ -11,6 +11,7 @@ import { JapanModule } from './japan/japan.module';
 import { KoreaModule } from './korea/korea.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ormConfig } from './orm.config';
+import { WeatherModule } from './weather/weather.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ormConfig } from './orm.config';
     JapanModule,
     KoreaModule,
     AccountingModule,
+    WeatherModule,
   ],
   controllers: [AppController],
   providers: [AppService],

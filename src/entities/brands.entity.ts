@@ -12,12 +12,15 @@ export class Brands extends BaseEntity {
   @Column({ type: 'enum', enum: BrandType })
   type: BrandType;
 
-  @Column('char', { length: 10 })
+  @Column('char', { nullable: true, length: 10 })
   manager_id: string;
 
-  @Column('int')
-  supplier_id: number;
+  @Column('char', { length: 10 })
+  supplier_id: string;
 
-  @Column('char')
+  @Column('char', { length: 10 })
   commission: string;
+
+  @Column('date')
+  created_at: Date;
 }
