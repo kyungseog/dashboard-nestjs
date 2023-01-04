@@ -23,4 +23,7 @@ export class Brands extends BaseEntity {
 
   @Column('date')
   created_at: Date;
+
+  @Column('char', { length: 10 })
+  status_id: string;
 }

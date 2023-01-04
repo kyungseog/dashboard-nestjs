@@ -1,16 +1,13 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { CountryType } from 'src/entities/enums';
+import { Controller, Get, Query } from '@nestjs/common';
 import { Weather } from 'src/entities/weather.entity';
 import { WeatherService } from './weather.service';
 
 @Controller('weather')
 export class WeatherController {
-  constructor(private managersService: WeatherService) {}
+  constructor(private weatherService: WeatherService) {}
 
-  @Get('/:country')
-  getWeatherByCountry(
-    @Param('country') country: CountryType,
-  ): Promise<Weather> {
-    return this.managersService.getWeatherByCountry(country);
+  @Get()
+  getWeather(@Query() weatherQuery): Promise<Weather[]> {
+    return this.weatherService.getWeather(weatherQuery);
   }
 }

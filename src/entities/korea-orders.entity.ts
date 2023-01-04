@@ -20,6 +20,9 @@ export class KoreaOrders extends BaseEntity {
   @Column('varchar', { length: 50 })
   product_variant_id: string;
 
+  @Column('char', { length: 10 })
+  brand_id: string;
+
   @Column('int')
   fixed_price: number;
 
