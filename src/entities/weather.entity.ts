@@ -12,10 +12,10 @@ export class Weather extends BaseEntity {
   @PrimaryColumn('date')
   date: Date;
 
-  @Column('float')
+  @Column('float', { nullable: true })
   temperature_min: number;
 
-  @Column('float')
+  @Column('float', { nullable: true })
   temperature_max: number;
 
   @Column('int', { nullable: true })
