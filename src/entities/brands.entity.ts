@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { BrandType } from './enums';
+import { BrandType, SupplierStatus } from './enums';
 
 @Entity()
 export class Brands extends BaseEntity {
@@ -24,6 +24,6 @@ export class Brands extends BaseEntity {
   @Column('date')
   created_at: Date;
 
-  @Column('char', { length: 10 })
-  status_id: string;
+  @Column({ type: 'enum', enum: SupplierStatus })
+  status_id: SupplierStatus;
 }

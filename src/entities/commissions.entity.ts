@@ -3,7 +3,7 @@ import { CommissionGrade } from './enums';
 
 @Entity()
 export class Commissions extends BaseEntity {
-  @PrimaryColumn('char')
+  @PrimaryColumn('char', { length: 10 })
   id: string;
 
   @PrimaryColumn({ type: 'enum', enum: CommissionGrade })
