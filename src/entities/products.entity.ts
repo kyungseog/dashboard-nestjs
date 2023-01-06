@@ -18,7 +18,7 @@ export class Products extends BaseEntity {
   @Column('char', { nullable: true, length: 10 })
   seller_id: string;
 
-  @Column('char', { nullable: true, length: 10 })
+  @Column('varchar', { nullable: true })
   custom_product_id: string;
 
   @Column({ type: 'enum', enum: CountryType, nullable: true })

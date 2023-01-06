@@ -8,6 +8,9 @@ export class LiveCommerces extends BaseEntity {
   @Column('varchar')
   campaign_key: string;
 
+  @Column('varchar')
+  name: string;
+
   @Column('char', { length: 10 })
   supplier_id: string;
 
