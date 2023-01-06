@@ -3,16 +3,16 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class LiveCommerces extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column('varchar')
   campaign_key: string;
 
-  @Column('int')
-  supplier_id: number;
+  @Column('char', { length: 10 })
+  supplier_id: string;
 
-  @Column('char')
-  brand_code: string;
+  @Column('char', { length: 10 })
+  brand_id: string;
 
   @Column('datetime')
   start_date: Date;

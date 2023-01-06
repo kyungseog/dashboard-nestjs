@@ -4,6 +4,7 @@ import { Between, Repository } from 'typeorm';
 
 import { LiveCommerces } from 'src/entities/live-commerces.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
+import { Brands } from 'src/entities/brands.entity';
 
 @Injectable()
 export class LiveCommercesService {
@@ -15,9 +16,11 @@ export class LiveCommercesService {
   ) {}
 
   async getLiveCommerce(start_date: Date): Promise<LiveCommerces> {
-    const found = await this.liveCommerceRepository.findOneBy({
-      start_date: start_date,
-    });
+    const found = await this.liveCommerceRepository
+      .createQueryBuilder('live')
+      .leftJoinAndSelect(Brands, 'brands', 'live.brand_id = brands.id')
+      .where('live.start_date = :start_date', { start_date: start_date })
+      .getOne();
     if (!found) {
       throw new NotFoundException(`can't find Live Commerce Data`);
     }

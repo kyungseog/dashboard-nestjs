@@ -1,4 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import { TaxType } from './enums';
 
 @Entity()
 export class KoreaOrders extends BaseEntity {
@@ -35,8 +36,11 @@ export class KoreaOrders extends BaseEntity {
   @Column('int')
   quantity: number;
 
-  @Column('varchar')
+  @Column('char', { length: 10 })
   status_id: string;
+
+  @Column({ type: 'enum', enum: TaxType })
+  tax_type: TaxType;
 
   @Column('varchar', { nullable: true })
   user_id: string;

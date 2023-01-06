@@ -14,11 +14,14 @@ export class JapanOrders extends BaseEntity {
   @Column('datetime')
   payment_date: Date;
 
-  @Column('datetime')
+  @Column('datetime', { nullable: true })
   delivery_date: Date;
 
-  @Column('char', { length: 10 })
+  @Column('varchar', { length: 50 })
   product_variant_id: string;
+
+  @Column('char', { length: 10 })
+  brand_id: string;
 
   @Column('int')
   fixed_price: number;
@@ -32,9 +35,9 @@ export class JapanOrders extends BaseEntity {
   @Column('int')
   quantity: number;
 
-  @Column('varchar')
+  @Column('char', { length: 10 })
   status_id: string;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true })
   user_id: string;
 }
