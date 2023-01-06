@@ -18,9 +18,9 @@ export class LiveCommercesService {
   async getLiveCommerce(start_date: Date): Promise<LiveCommerces> {
     const found = await this.liveCommerceRepository
       .createQueryBuilder('live')
-      .leftJoinAndSelect(Brands, 'brands', 'live.brand_id = brands.id')
+      .leftJoinAndSelect(Brands, 'brand', 'live.brand_id = brands.id')
       .where('live.start_date = :start_date', { start_date: start_date })
-      .getOne();
+      .getRawOne();
     if (!found) {
       throw new NotFoundException(`can't find Live Commerce Data`);
     }
