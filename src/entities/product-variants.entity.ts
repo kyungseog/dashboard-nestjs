@@ -1,5 +1,4 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { AgeType } from './enums';
 
 @Entity()
 export class ProductVariants extends BaseEntity {
@@ -8,9 +7,6 @@ export class ProductVariants extends BaseEntity {
 
   @Column('varchar', { nullable: true })
   custom_variant_id: string;
-
-  @Column('char', { nullable: true, length: 10 })
-  cost_id: string;
 
   @Column('varchar', { nullable: true })
   variant_color: string;
@@ -24,9 +20,15 @@ export class ProductVariants extends BaseEntity {
   @Column('varchar', { nullable: true })
   variant_etc2: string;
 
-  @Column({ type: 'enum', enum: AgeType, nullable: true })
-  age_type: AgeType;
-
   @Column('char', { length: 10 })
   product_id: string;
+
+  @Column('int')
+  option_price: number;
+
+  @Column('datetime')
+  updated_at: Date;
+
+  @Column('varchar', { nullable: true })
+  cafe_variant_code: string;
 }

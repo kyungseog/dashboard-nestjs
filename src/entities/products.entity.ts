@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { CountryType } from './enums';
+import { CountryType, TaxType } from './enums';
 
 @Entity()
 export class Products extends BaseEntity {
@@ -26,4 +26,16 @@ export class Products extends BaseEntity {
 
   @Column('datetime')
   updated_at: Date;
+
+  @Column({ type: 'enum', enum: TaxType })
+  tax_type: TaxType;
+
+  @Column('int')
+  fixed_price: number;
+
+  @Column('int')
+  product_price: number;
+
+  @Column('varchar', { nullable: true })
+  cafe_product_code: string;
 }

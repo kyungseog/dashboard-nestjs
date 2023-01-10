@@ -20,7 +20,7 @@ export class LiveCommercesService {
   async getLiveCommerce(start_date: Date): Promise<LiveCommerces> {
     const found = await this.liveCommerceRepository
       .createQueryBuilder('live')
-      .leftJoinAndSelect(Brands, 'brand', 'live.brand_id = brands.id')
+      .leftJoinAndSelect(Brands, 'brand', 'live.brand_id = brand.id')
       .where('live.start_date = :start_date', { start_date: start_date })
       .getRawOne();
     if (!found) {
@@ -33,13 +33,8 @@ export class LiveCommercesService {
     const { brand_id, start_datetime, end_datetime } = liveSales;
     const salesData = await this.koreaOrdersRepository
       .createQueryBuilder('order')
-      .leftJoinAndSelect(
-        ProductVariants,
-        'variant',
-        'order.product_variant_id = variant.id',
-      )
-      .leftJoinAndSelect(Products, 'product', 'variant.product_id = product.id')
-      .where('order.brand_id = :brand_id', { brand_id: brand_id })
+      .leftJoinAndSelect(Products, 'product', 'order.product_id = product.id')
+      .where('product.brand_id = :brand_id', { brand_id: brand_id })
       .andWhere('order.payment_date > :start_datetime', {
         start_datetime: start_datetime,
       })

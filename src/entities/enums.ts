@@ -25,8 +25,8 @@ export enum CommissionGrade {
 }
 
 export enum TaxType {
-  taxation = 'taxation', //과세
-  taxfree = 'taxfree', //면세
+  t = 't', //과세
+  f = 'f', //면세
 }
 
 export enum AgeType {
