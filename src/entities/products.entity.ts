@@ -24,7 +24,7 @@ export class Products extends BaseEntity {
   @Column({ type: 'enum', enum: CountryType, nullable: true })
   production_country: CountryType;
 
-  @Column('datetime')
+  @Column('datetime', { nullable: true })
   updated_at: Date;
 
   @Column({ type: 'enum', enum: TaxType })

@@ -26,7 +26,7 @@ export class ProductVariants extends BaseEntity {
   @Column('int')
   option_price: number;
 
-  @Column('datetime')
+  @Column('datetime', { nullable: true })
   updated_at: Date;
 
   @Column('varchar', { nullable: true })
