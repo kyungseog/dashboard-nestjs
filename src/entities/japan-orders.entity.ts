@@ -18,10 +18,10 @@ export class JapanOrders extends BaseEntity {
   delivery_date: Date;
 
   @Column('varchar', { length: 50 })
-  product_variant_id: string;
+  product_id: string;
 
-  @Column('char', { length: 10 })
-  brand_id: string;
+  @Column('varchar', { length: 50 })
+  product_variant_id: string;
 
   @Column('int')
   fixed_price: number;
