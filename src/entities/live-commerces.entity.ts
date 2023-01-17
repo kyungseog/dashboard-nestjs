@@ -19,4 +19,7 @@ export class LiveCommerces extends BaseEntity {
 
   @Column('datetime')
   start_date: Date;
+
+  @Column('datetime', { nullable: true })
+  end_date: Date;
 }

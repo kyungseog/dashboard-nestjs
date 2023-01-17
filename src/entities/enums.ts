@@ -86,10 +86,3 @@ export enum JapanDeliveryFeeType {
   add_fee = 'add_fee', //추가차감
   return_korea = 'return_korea', //한국반송료
 }
-
-export enum MarketingChannel {
-  meta = 'meta', //메타
-  naver = 'naver', //네이버
-  kakao = 'kakao', //카카오
-  google = 'google', //구글
-}
