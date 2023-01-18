@@ -14,7 +14,7 @@ function ormConfig(): TypeOrmModuleOptions {
     port: Number(process.env.DB_PORT),
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
-    logging: true,
+    logging: ['error'],
     synchronize: commonConf.SYNCRONIZE,
     entities: commonConf.ENTITIES,
   };

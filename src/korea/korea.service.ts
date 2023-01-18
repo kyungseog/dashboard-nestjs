@@ -11,13 +11,57 @@ export class KoreaService {
   ) {}
 
   async getSales(sales): Promise<KoreaOrders[]> {
-    const { start_date, end_date } = sales;
-    const salesData = await this.koreaOrdersRepository.findBy({
-      payment_date: Between(start_date, end_date),
-    });
-    if (!salesData) {
-      throw new NotFoundException(`can't find live sales datas`);
+    const { today, type } = sales;
+
+    if (type === '1') {
+      const salesData = await this.koreaOrdersRepository
+        .createQueryBuilder('koreaOrders')
+        .select(
+          'SUM(koreaOrders.sale_price) - SUM(koreaOrders.discount_price)',
+          'sales_price',
+        )
+        .addSelect('COUNT(DISTINCT(koreaOrders.id))', 'order_count')
+        .where('DATE(koreaOrders.payment_date) = :today', { today: today })
+        .andWhere('koreaOrders.status_id IN (:...ids)', {
+          ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+        })
+        .groupBy('DATE(koreaOrders.payment_date)')
+        .getRawOne();
+      if (!salesData) {
+        throw new NotFoundException(`can't find today's sales datas`);
+      }
+      return salesData;
     }
-    return salesData;
+    if (type === '10') {
+      const todayDate = new Date(today);
+      const beforeDate = new Date(todayDate.getTime());
+      beforeDate.setDate(todayDate.getDate() - 10);
+      const beforeDay =
+        beforeDate.getFullYear +
+        '-' +
+        beforeDate.getMonth +
+        '-' +
+        beforeDate.getDate;
+
+      const salesData = await this.koreaOrdersRepository
+        .createQueryBuilder('koreaOrders')
+        .select(
+          'SUM(koreaOrders.sale_price) - SUM(koreaOrders.discount_price)',
+          'sales_price',
+        )
+        .where('DATE(koreaOrders.payment_date) < :today', { today: today })
+        .andWhere('DATE(koreaOrders.payment_date) => :beforeDay', {
+          beforeDay: beforeDay,
+        })
+        .andWhere('koreaOrders.status_id IN (:...ids)', {
+          ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+        })
+        .groupBy('DATE(koreaOrders.payment_date)')
+        .getRawMany();
+      if (!salesData) {
+        throw new NotFoundException(`can't find today's sales datas`);
+      }
+      return salesData;
+    }
   }
 }

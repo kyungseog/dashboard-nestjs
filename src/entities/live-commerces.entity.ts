@@ -11,11 +11,11 @@ export class LiveCommerces extends BaseEntity {
   @Column('varchar')
   name: string;
 
-  @Column('char', { length: 10 })
-  supplier_id: string;
-
-  @Column('char', { length: 10 })
+  @Column('char', { length: 10, nullable: true })
   brand_id: string;
+
+  @Column('char', { length: 10, nullable: true })
+  event_sno: string;
 
   @Column('datetime')
   start_date: Date;
