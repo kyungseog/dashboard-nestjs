@@ -32,12 +32,12 @@ export class KoreaService {
         throw new NotFoundException(`can't find today's sales datas`);
       }
       return salesData;
-    }
-    if (type === '10') {
+    } else {
+      const agoDays = Number(type);
       const beforeDay = DateTime.fromISO(today)
-        .minus({ days: 10 })
+        .minus({ days: agoDays })
         .toFormat('yyyy-LL-dd');
-      console.log(beforeDay);
+
       const salesData = await this.koreaOrdersRepository
         .createQueryBuilder('koreaOrders')
         .select(
@@ -54,7 +54,7 @@ export class KoreaService {
         .groupBy('DATE(koreaOrders.payment_date)')
         .getRawMany();
       if (!salesData) {
-        throw new NotFoundException(`can't find today's sales datas`);
+        throw new NotFoundException(`can't find 10 days sales datas`);
       }
       return salesData;
     }
