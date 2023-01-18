@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class KoreaService {
@@ -33,16 +34,10 @@ export class KoreaService {
       return salesData;
     }
     if (type === '10') {
-      const todayDate = new Date(today);
-      const beforeDate = new Date(todayDate.getTime());
-      beforeDate.setDate(todayDate.getDate() - 10);
-      const beforeDay =
-        beforeDate.getFullYear +
-        '-' +
-        beforeDate.getMonth +
-        '-' +
-        beforeDate.getDate;
-
+      const beforeDay = DateTime.fromISO(today)
+        .minus({ days: 10 })
+        .toFormat('yyyy-LL-dd');
+      console.log(beforeDay);
       const salesData = await this.koreaOrdersRepository
         .createQueryBuilder('koreaOrders')
         .select(
