@@ -13,7 +13,7 @@ export class KoreaController {
 
   @Get('/brand-sales')
   getBrandSales(@Query() brandSales): Promise<KoreaOrders[]> {
-    return this.koreaService.getSales(brandSales);
+    return this.koreaService.getBrandSales(brandSales);
   }
 
   @Get('/product-sales')

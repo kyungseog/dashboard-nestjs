@@ -7,6 +7,7 @@ import { KoreaMarketingMeta } from 'src/entities/korea-marketing-meta.entity';
 import { KoreaMileages } from 'src/entities/korea-mileages.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
+import { Products } from 'src/entities/products.entity';
 import { KoreaController } from './korea.controller';
 import { KoreaService } from './korea.service';
 
@@ -20,6 +21,7 @@ import { KoreaService } from './korea.service';
       KoreaDeliveries,
       KoreaMarketingMeta,
       KoreaExpenses,
+      Products,
     ]),
   ],
   controllers: [KoreaController],

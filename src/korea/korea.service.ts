@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
-import { Between, Repository } from 'typeorm';
+import { Products } from 'src/entities/products.entity';
+import { Brands } from 'src/entities/brands.entity';
+import { Repository } from 'typeorm';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class KoreaService {
@@ -12,7 +15,6 @@ export class KoreaService {
 
   async getSales(sales): Promise<KoreaOrders[]> {
     const { today, type } = sales;
-
     if (type === '1') {
       const salesData = await this.koreaOrdersRepository
         .createQueryBuilder('koreaOrders')
@@ -33,24 +35,18 @@ export class KoreaService {
       return salesData;
     }
     if (type === '10') {
-      const todayDate = new Date(today);
-      const beforeDate = new Date(todayDate.getTime());
-      beforeDate.setDate(todayDate.getDate() - 10);
-      const beforeDay =
-        beforeDate.getFullYear +
-        '-' +
-        beforeDate.getMonth +
-        '-' +
-        beforeDate.getDate;
-
+      const beforeDay = DateTime.fromISO(today)
+        .minus({ days: 10 })
+        .toFormat('yyyy-LL-dd');
       const salesData = await this.koreaOrdersRepository
         .createQueryBuilder('koreaOrders')
-        .select(
+        .select('DATE(koreaOrders.payment_date)', 'payment_date')
+        .addSelect(
           'SUM(koreaOrders.sale_price) - SUM(koreaOrders.discount_price)',
           'sales_price',
         )
         .where('DATE(koreaOrders.payment_date) < :today', { today: today })
-        .andWhere('DATE(koreaOrders.payment_date) => :beforeDay', {
+        .andWhere('DATE(koreaOrders.payment_date) >= :beforeDay', {
           beforeDay: beforeDay,
         })
         .andWhere('koreaOrders.status_id IN (:...ids)', {
@@ -59,9 +55,55 @@ export class KoreaService {
         .groupBy('DATE(koreaOrders.payment_date)')
         .getRawMany();
       if (!salesData) {
-        throw new NotFoundException(`can't find today's sales datas`);
+        throw new NotFoundException(`can't find days sales datas`);
       }
       return salesData;
     }
+  }
+
+  async getBrandSales(brandSales): Promise<KoreaOrders[]> {
+    const { today, type } = brandSales;
+    let targetDay: string;
+    let beforeDay: string;
+    if (type === '1') {
+      targetDay = DateTime.fromISO(today)
+        .plus({ days: 1 })
+        .toFormat('yyyy-LL-dd');
+      beforeDay = today;
+    } else {
+      targetDay = today;
+      beforeDay = DateTime.fromISO(today)
+        .minus({ days: Number(type) })
+        .toFormat('yyyy-LL-dd');
+    }
+    const salesData = await this.koreaOrdersRepository
+      .createQueryBuilder('koreaOrders')
+      .leftJoin(Products, 'product', 'koreaOrders.product_id = product.id')
+      .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
+      .select('product.brand_id', 'brand_id')
+      .addSelect('brand.name', 'brand_name')
+      .addSelect('COUNT(DISTINCT(koreaOrders.id))', 'order_count')
+      .addSelect('SUM(koreaOrders.quantity)', 'quantity')
+      .addSelect(
+        'SUM(koreaOrders.sale_price) - SUM(koreaOrders.discount_price)',
+        'sales_price',
+      )
+      .where('DATE(koreaOrders.payment_date) < :targetDay', {
+        targetDay: targetDay,
+      })
+      .andWhere('DATE(koreaOrders.payment_date) >= :beforeDay', {
+        beforeDay: beforeDay,
+      })
+      .andWhere('koreaOrders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .groupBy('product.brand_id')
+      .orderBy('sales_price', 'DESC')
+      .limit(6)
+      .getRawMany();
+    if (!salesData) {
+      throw new NotFoundException(`can't find days sales datas`);
+    }
+    return salesData;
   }
 }
