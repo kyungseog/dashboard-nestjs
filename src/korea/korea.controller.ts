@@ -7,18 +7,29 @@ export class KoreaController {
   constructor(private koreaService: KoreaService) {}
 
   @Get('/sales')
-  getSales(@Query() sales): Promise<KoreaOrders[]> {
+  getSales(
+    @Query() sales: { today: string; type: string },
+  ): Promise<KoreaOrders[]> {
     return this.koreaService.getSales(sales);
   }
 
   @Get('/brand-sales')
-  getBrandSales(@Query() brandSales): Promise<KoreaOrders[]> {
-    return this.koreaService.getSales(brandSales);
+  getBrandSales(
+    @Query() brandSales: { today: string; type: string },
+  ): Promise<KoreaOrders[]> {
+    return this.koreaService.getBrandSales(brandSales);
   }
 
   @Get('/product-sales')
-  getProductSales(@Query() productSales): Promise<KoreaOrders[]> {
-    return this.koreaService.getSales(productSales);
+  getProductSales(
+    @Query() productSales: { today: string; type: string },
+  ): Promise<KoreaOrders[]> {
+    return this.koreaService.getProductSales(productSales);
+  }
+
+  @Get('/users')
+  getUsers(@Query() users): Promise<KoreaOrders[]> {
+    return this.koreaService.getSales(users);
   }
 
   @Get('/salesWeight')

@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { LiveCommerces } from 'src/entities/live-commerces.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { Brands } from 'src/entities/brands.entity';
-import { ProductVariants } from 'src/entities/product-variants.entity';
 import { Products } from 'src/entities/products.entity';
 
 @Injectable()

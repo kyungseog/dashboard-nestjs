@@ -7,4 +7,7 @@ export class KoreaUsers extends BaseEntity {
 
   @Column('datetime')
   created_at: Date;
+
+  @Column('datetime', { nullable: true })
+  updated_at: Date;
 }
