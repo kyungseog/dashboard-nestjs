@@ -43,4 +43,28 @@ export class KoreaOrders extends BaseEntity {
 
   @Column('float')
   commission_rate: number;
+
+  @Column('int')
+  deposit: number;
+
+  @Column('int')
+  mileage: number;
+
+  @Column('int')
+  order_coupon: number;
+
+  @Column('int')
+  product_coupon: number;
+
+  @Column('char', { length: 10 })
+  channel: string;
+
+  @Column('int')
+  payment_price: number;
+
+  @Column('char', { length: 50, nullable: true })
+  user_group: string;
+
+  @Column('char', { length: 10 })
+  is_first: string;
 }
