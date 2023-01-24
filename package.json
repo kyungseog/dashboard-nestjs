@@ -26,10 +26,7 @@
     "@nestjs/core": "^9.1.4",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
-<<<<<<< HEAD
-=======
     "@types/luxon": "^3.2.0",
->>>>>>> 4f1372c66324eddd2c73189e7b36386d9ebb475c
     "luxon": "^3.2.1",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.13",

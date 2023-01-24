@@ -35,9 +35,36 @@ export class JapanOrders extends BaseEntity {
   @Column('int')
   quantity: number;
 
+  @Column('varchar', { nullable: true })
+  user_id: string;
+
   @Column('char', { length: 10 })
   status_id: string;
 
-  @Column('varchar', { nullable: true })
-  user_id: string;
+  @Column('float')
+  commission_rate: number;
+
+  @Column('int')
+  deposit: number;
+
+  @Column('int')
+  mileage: number;
+
+  @Column('int')
+  order_coupon: number;
+
+  @Column('int')
+  product_coupon: number;
+
+  @Column('char', { length: 10 })
+  channel: string;
+
+  @Column('int')
+  payment_price: number;
+
+  @Column('char', { length: 50, nullable: true })
+  user_group: string;
+
+  @Column('char', { length: 10 })
+  is_first: string;
 }

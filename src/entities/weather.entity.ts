@@ -29,7 +29,4 @@ export class Weather extends BaseEntity {
 
   @Column('float', { nullable: true })
   snow: number;
-
-  @Column('char', { nullable: true, length: 10 })
-  status_name: string;
 }
