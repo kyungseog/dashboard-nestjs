@@ -1,13 +1,13 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class Costs extends BaseEntity {
+export class CostIds extends BaseEntity {
   @PrimaryColumn('char', { length: 50 })
-  id: string;
+  barcode: string;
 
-  @Column('char', { length: 50 })
+  @Column('varchar', { nullable: true })
   custom_variant_id: string;
 
-  @Column('char', { length: 50 })
-  barcode: string;
+  @Column('varchar', { nullable: true })
+  id: string;
 }

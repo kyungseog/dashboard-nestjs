@@ -56,7 +56,7 @@ export class KoreaOrders extends BaseEntity {
   @Column('int')
   product_coupon: number;
 
-  @Column('char', { length: 10 })
+  @Column('char', { length: 10, nullable: true })
   channel: string;
 
   @Column('int')
@@ -65,6 +65,6 @@ export class KoreaOrders extends BaseEntity {
   @Column('char', { length: 50, nullable: true })
   user_group: string;
 
-  @Column('char', { length: 10 })
+  @Column('char', { length: 10, nullable: true })
   is_first: string;
 }

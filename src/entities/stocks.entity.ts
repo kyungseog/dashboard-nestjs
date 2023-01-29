@@ -1,17 +1,40 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { WarehouseType } from './enums';
 
 @Entity()
 export class Stocks extends BaseEntity {
-  @PrimaryColumn('char', { length: 10 })
-  id: string;
+  @Column('varchar')
+  seller_name: string;
 
-  @Column({ type: 'enum', enum: WarehouseType })
-  warehouse: WarehouseType;
+  @Column('char', { length: 50, nullable: true })
+  seller_id: string;
+
+  @Column('varchar', { nullable: true })
+  custom_product_id: string;
+
+  @PrimaryColumn('char', { length: 50 })
+  barcode: string;
+
+  @Column('varchar', { nullable: true })
+  custom_variant_id: string;
+
+  @Column('varchar')
+  product_name: string;
+
+  @Column('varchar', { nullable: true })
+  option_name: string;
 
   @Column('int')
   quantity: number;
 
-  @Column('datetime')
-  updated_at: Date;
+  @Column('int')
+  non_delivery_order: number;
+
+  @Column('int')
+  usable_quantity: number;
+
+  @Column('int', { nullable: true })
+  cost: number;
+
+  @Column('int', { nullable: true })
+  total_cost: number;
 }

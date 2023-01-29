@@ -1,8 +1,8 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class LiveCommerces extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn('int')
   id: number;
 
   @Column('varchar')
