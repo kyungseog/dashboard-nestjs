@@ -44,6 +44,9 @@ export class KoreaOrders extends BaseEntity {
   @Column('float')
   commission_rate: number;
 
+  @Column('float', { nullable: true })
+  fixed_commission_rate: number;
+
   @Column('int')
   deposit: number;
 

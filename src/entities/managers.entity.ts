@@ -8,13 +8,13 @@ export class Managers extends BaseEntity {
   @Column('char', { length: 10 })
   password: string;
 
-  @Column('char', { length: 10 })
+  @Column('char', { length: 50 })
   partname: string;
 
   @Column('char', { length: 10 })
   position: string;
 
-  @Column('char', { length: 10 })
+  @Column('char', { length: 50 })
   name: string;
 
   @Column('text')

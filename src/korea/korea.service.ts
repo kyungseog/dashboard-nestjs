@@ -5,12 +5,15 @@ import { Products } from 'src/entities/products.entity';
 import { Brands } from 'src/entities/brands.entity';
 import { Repository } from 'typeorm';
 import { DateTime } from 'luxon';
+import { KoreaUsers } from 'src/entities/korea-users.entity';
 
 @Injectable()
 export class KoreaService {
   constructor(
     @InjectRepository(KoreaOrders)
     private koreaOrdersRepository: Repository<KoreaOrders>,
+    @InjectRepository(KoreaUsers)
+    private koreaUsersRepository: Repository<KoreaUsers>,
   ) {}
 
   getDate(dates: { today: string; type: string }) {
@@ -24,34 +27,69 @@ export class KoreaService {
     return { targetDay, beforeDay };
   }
 
-  async getSales(sales: {
-    today: string;
-    type: string;
-  }): Promise<KoreaOrders[]> {
-    const { targetDay, beforeDay } = this.getDate(sales);
-    const salesData = await this.koreaOrdersRepository
-      .createQueryBuilder('koreaOrders')
-      .select('DATE(koreaOrders.payment_date)', 'payment_date')
-      .addSelect(
-        'SUM(koreaOrders.sale_price) - SUM(koreaOrders.discount_price)',
-        'sales_price',
-      )
-      .addSelect('COUNT(DISTINCT(koreaOrders.id))', 'order_count')
-      .where('DATE(koreaOrders.payment_date) < :targetDay', {
-        targetDay: targetDay,
+  async getSales(): Promise<KoreaOrders[]> {
+    const today = DateTime.now().toFormat('yyyy-LL-dd');
+    const todayData = await this.koreaOrdersRepository
+      .createQueryBuilder()
+      .select('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .addSelect('COUNT(DISTINCT(id))', 'order_count')
+      .where('DATE(payment_date) = :today', {
+        today: today,
       })
-      .andWhere('DATE(koreaOrders.payment_date) >= :beforeDay', {
-        beforeDay: beforeDay,
-      })
-      .andWhere('koreaOrders.status_id IN (:...ids)', {
+      .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
-      .groupBy('DATE(koreaOrders.payment_date)')
       .getRawMany();
-    if (!salesData) {
-      throw new NotFoundException(`can't find days sales datas`);
-    }
-    return salesData;
+    const monthlyData = await this.koreaOrdersRepository
+      .createQueryBuilder()
+      .select('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .where('YEAR(payment_date) = :year', {
+        year: Number(today.substring(0, 4)),
+      })
+      .andWhere('MONTH(payment_date) = :month', {
+        month: Number(today.substring(5, 7)),
+      })
+      .andWhere('status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .getRawOne();
+    return [todayData, monthlyData];
+  }
+
+  async getChartSales(): Promise<KoreaOrders[][]> {
+    const thisYearData = await this.koreaOrdersRepository
+      .createQueryBuilder()
+      .select('DATE(payment_date)', 'payment_date')
+      .addSelect('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .where('DATE(payment_date) > :startDate', {
+        startDate: DateTime.now().minus({ days: 14 }).toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('DATE(payment_date) <= :today', {
+        today: DateTime.now().toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .groupBy('DATE(payment_date)')
+      .getRawMany();
+    const beforeYearData = await this.koreaOrdersRepository
+      .createQueryBuilder()
+      .select('DATE(payment_date)', 'payment_date')
+      .addSelect('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .where('DATE(payment_date) > :startDate', {
+        startDate: DateTime.now()
+          .minus({ years: 1, days: 14 })
+          .toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('DATE(payment_date) <= :today', {
+        today: DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .groupBy('DATE(payment_date)')
+      .getRawMany();
+    return [thisYearData, beforeYearData];
   }
 
   async getBrandSales(brandSales: {
@@ -133,5 +171,34 @@ export class KoreaService {
       throw new NotFoundException(`can't find brand sales datas`);
     }
     return salesData;
+  }
+
+  async getUsers(): Promise<KoreaUsers[]> {
+    const targetDate = DateTime.now().minus({ days: 1 }).toFormat('yyyy-LL-dd');
+    const targetDateUsers = await this.koreaUsersRepository
+      .createQueryBuilder()
+      .select('COUNT(id)', 'target_date_users')
+      .where('DATE(created_at) = :today', {
+        today: targetDate,
+      })
+      .getRawOne();
+    const monthlyUsers = await this.koreaUsersRepository
+      .createQueryBuilder()
+      .select('COUNT(id)', 'monthly_users')
+      .where('YEAR(created_at) = :year', {
+        year: Number(targetDate.substring(0, 4)),
+      })
+      .andWhere('MONTH(created_at) = :month', {
+        month: Number(targetDate.substring(5, 7)),
+      })
+      .getRawOne();
+    const totalUsers = await this.koreaUsersRepository
+      .createQueryBuilder()
+      .select('COUNT(id)', 'total_users')
+      .where('DATE(created_at) <= :today', {
+        today: targetDate,
+      })
+      .getRawOne();
+    return [targetDateUsers, monthlyUsers, totalUsers];
   }
 }

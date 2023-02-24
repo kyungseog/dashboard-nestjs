@@ -9,5 +9,8 @@ export class CostIds extends BaseEntity {
   custom_variant_id: string;
 
   @Column('varchar', { nullable: true })
+  product_variant_id: string;
+
+  @Column('varchar', { nullable: true })
   id: string;
 }

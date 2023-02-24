@@ -3,10 +3,10 @@ import { ClaimType, CountryType, TaxType } from './enums';
 
 @Entity()
 export class AccountClaims extends BaseEntity {
-  @PrimaryColumn('char', { length: 10 })
+  @PrimaryColumn('varchar', { length: 100 })
   order_item_id: string;
 
-  @Column('char', { length: 10 })
+  @Column('char', { length: 50 })
   brand_id: string;
 
   @Column({ type: 'enum', enum: CountryType })

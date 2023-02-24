@@ -2,11 +2,11 @@ import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 import { CountryType, TaxType } from './enums';
 
 @Entity()
-export class AccountOrders extends BaseEntity {
-  @PrimaryColumn('char', { length: 10 })
+export class AccountOrdersConsignment extends BaseEntity {
+  @PrimaryColumn('varchar', { length: 100 })
   order_item_id: string;
 
-  @Column('char', { length: 10 })
+  @Column('char', { length: 50, nullable: true })
   brand_id: string;
 
   @Column({ type: 'enum', enum: CountryType })

@@ -12,7 +12,10 @@ export class Brands extends BaseEntity {
   @Column({ type: 'enum', enum: BrandType })
   type: BrandType;
 
-  @Column('char', { nullable: true, length: 10 })
+  @Column('varchar', { nullable: true })
+  squad: string;
+
+  @Column('char', { nullable: true, length: 50 })
   manager_id: string;
 
   @Column('char', { length: 10 })

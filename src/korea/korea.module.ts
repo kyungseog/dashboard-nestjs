@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { KoreaCoupons } from 'src/entities/korea-coupons.entity';
 import { KoreaExpenses } from 'src/entities/korea-expenses.entity';
 import { KoreaDeliveries } from 'src/entities/korea-deliveries.entity';
-import { KoreaMarketingMeta } from 'src/entities/korea-marketing-meta.entity';
+import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaMileages } from 'src/entities/korea-mileages.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
@@ -19,7 +19,7 @@ import { KoreaService } from './korea.service';
       KoreaCoupons,
       KoreaMileages,
       KoreaDeliveries,
-      KoreaMarketingMeta,
+      KoreaMarketing,
       KoreaExpenses,
       Products,
     ]),
