@@ -9,7 +9,7 @@ export class KoreaMarketing extends BaseEntity {
   channel: string;
 
   @Column('date')
-  created_date: Date;
+  created_at: Date;
 
   @Column('varchar')
   name: string;

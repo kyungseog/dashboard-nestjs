@@ -6,6 +6,7 @@ import { Brands } from 'src/entities/brands.entity';
 import { Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
+import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 
 @Injectable()
 export class KoreaService {
@@ -14,18 +15,9 @@ export class KoreaService {
     private koreaOrdersRepository: Repository<KoreaOrders>,
     @InjectRepository(KoreaUsers)
     private koreaUsersRepository: Repository<KoreaUsers>,
+    @InjectRepository(KoreaMarketing)
+    private koreaMarketingRepository: Repository<KoreaMarketing>,
   ) {}
-
-  getDate(dates: { today: string; type: string }) {
-    const { today, type } = dates;
-    const targetDay: string = DateTime.fromISO(today)
-      .plus({ days: 1 })
-      .toFormat('yyyy-LL-dd');
-    const beforeDay: string = DateTime.fromISO(today)
-      .minus({ days: Number(type) })
-      .toFormat('yyyy-LL-dd');
-    return { targetDay, beforeDay };
-  }
 
   async getSales(): Promise<KoreaOrders[]> {
     const today = DateTime.now().toFormat('yyyy-LL-dd');
@@ -92,36 +84,43 @@ export class KoreaService {
     return [thisYearData, beforeYearData];
   }
 
-  async getBrandSales(brandSales: {
-    today: string;
-    type: string;
-  }): Promise<KoreaOrders[]> {
-    const { targetDay, beforeDay } = this.getDate(brandSales);
-    const salesData = await this.koreaOrdersRepository
+  async getBrandSales(): Promise<KoreaOrders[][]> {
+    const marketingFee = await this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .select('marketing.brand_id', 'brand_id')
+      .addSelect('SUM(marketing.cost)', 'cost')
+      .where('DATE(marketing.created_at) = :yesterday', {
+        yesterday: DateTime.now().minus({ days: 1 }).toFormat('yyyy-LL-dd'),
+      })
+      .groupBy('marketing.brand_id')
+      .getRawMany();
+    const brandSalesData = await this.koreaOrdersRepository
       .createQueryBuilder('orders')
       .leftJoin(Products, 'product', 'orders.product_id = product.id')
       .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
       .select('product.brand_id', 'brand_id')
       .addSelect('brand.name', 'brand_name')
+      .addSelect('brand.type', 'brand_type')
       .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
       .addSelect('SUM(orders.quantity)', 'quantity')
       .addSelect(
-        'SUM(orders.sale_price) - SUM(orders.discount_price)',
+        'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
         'sales_price',
       )
       .addSelect(
+        'ROUND(SUM((orders.sale_price - orders.discount_price) * orders.quantity * orders.commission_rate / 100))',
+        'commission',
+      )
+      .addSelect(
         'SUM(orders.mileage) + SUM(orders.order_coupon) + SUM(orders.product_coupon)',
-        'cost',
+        'expense',
       )
       .addSelect(
         'IF(orders.channel = "shop", ROUND(SUM(orders.sale_price - orders.discount_price - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.032), ROUND(SUM(orders.sale_price - orders.discount_price - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.034))',
-        'pg_cost',
+        'pg_expense',
       )
-      .where('DATE(orders.payment_date) < :targetDay', {
-        targetDay: targetDay,
-      })
-      .andWhere('DATE(orders.payment_date) >= :beforeDay', {
-        beforeDay: beforeDay,
+      .where('DATE(orders.payment_date) = :yesterday', {
+        yesterday: DateTime.now().minus({ days: 1 }).toFormat('yyyy-LL-dd'),
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -130,47 +129,96 @@ export class KoreaService {
       .orderBy('sales_price', 'DESC')
       .limit(6)
       .getRawMany();
-    if (!salesData) {
+    if (!brandSalesData) {
       throw new NotFoundException(`can't find brand sales datas`);
     }
-    return salesData;
+    return [marketingFee, brandSalesData];
   }
 
-  async getProductSales(productSales: {
-    today: string;
-    type: string;
-  }): Promise<KoreaOrders[]> {
-    const { targetDay, beforeDay } = this.getDate(productSales);
-    const salesData = await this.koreaOrdersRepository
-      .createQueryBuilder('koreaOrders')
-      .leftJoin(Products, 'product', 'koreaOrders.product_id = product.id')
+  async getProductSales(targetDate: string): Promise<KoreaOrders[]> {
+    let startDay = '';
+    if (targetDate === 'today') {
+      startDay = DateTime.now().toFormat('yyyy-LL-dd');
+    } else if (targetDate === 'last_7_days') {
+      startDay = DateTime.now().minus({ days: 7 }).toFormat('yyyy-LL-dd');
+    } else {
+      startDay = DateTime.now().minus({ days: 14 }).toFormat('yyyy-LL-dd');
+    }
+    const productSalesData = await this.koreaOrdersRepository
+      .createQueryBuilder('orders')
+      .leftJoin(Products, 'product', 'orders.product_id = product.id')
       .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
       .select('product.name', 'product_name')
       .addSelect('product.image', 'image')
       .addSelect('brand.name', 'brand_name')
-      .addSelect('COUNT(DISTINCT(koreaOrders.id))', 'order_count')
-      .addSelect('SUM(koreaOrders.quantity)', 'quantity')
+      .addSelect('brand.type', 'brand_type')
+      .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
+      .addSelect('SUM(orders.quantity)', 'quantity')
       .addSelect(
-        'SUM(koreaOrders.sale_price) - SUM(koreaOrders.discount_price)',
+        'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
         'sales_price',
       )
-      .where('DATE(koreaOrders.payment_date) < :targetDay', {
-        targetDay: targetDay,
+      .addSelect(
+        'ROUND(SUM((orders.sale_price - orders.discount_price) * orders.quantity * orders.commission_rate / 100))',
+        'commission',
+      )
+      .addSelect(
+        'SUM(orders.mileage) + SUM(orders.order_coupon) + SUM(orders.product_coupon)',
+        'expense',
+      )
+      .addSelect(
+        'IF(orders.channel = "shop", ROUND(SUM(orders.sale_price - orders.discount_price - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.032), ROUND(SUM(orders.sale_price - orders.discount_price - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.034))',
+        'pg_expense',
+      )
+      .where('DATE(orders.payment_date) <= :today', {
+        today: DateTime.now().toFormat('yyyy-LL-dd'),
       })
-      .andWhere('DATE(koreaOrders.payment_date) >= :beforeDay', {
-        beforeDay: beforeDay,
+      .andWhere('DATE(orders.payment_date) >= :startDay', {
+        startDay: startDay,
       })
-      .andWhere('koreaOrders.status_id IN (:...ids)', {
+      .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
       .groupBy('product.id')
       .orderBy('sales_price', 'DESC')
       .limit(6)
       .getRawMany();
-    if (!salesData) {
+    if (!productSalesData) {
       throw new NotFoundException(`can't find brand sales datas`);
     }
-    return salesData;
+    return productSalesData;
+  }
+
+  async getMarketing(): Promise<KoreaMarketing[][]> {
+    const targetDate = DateTime.now().toFormat('yyyy-LL-dd');
+    const salesByChannel = await this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .select('marketing.channel', 'channel')
+      .addSelect('SUM(marketing.cost)', 'cost')
+      .addSelect('SUM(marketing.conversion)', 'conversion')
+      .where('YEAR(marketing.created_at) = :year', {
+        year: Number(targetDate.substring(0, 4)),
+      })
+      .andWhere('MONTH(marketing.created_at) = :month', {
+        month: Number(targetDate.substring(5, 7)),
+      })
+      .groupBy('marketing.channel')
+      .getRawMany();
+    const salesByType = await this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .leftJoin(Brands, 'brand', 'marketing.brand_id = brand.id')
+      .select('brand.id', 'brand_id')
+      .addSelect('SUM(marketing.cost)', 'cost')
+      .addSelect('SUM(marketing.conversion)', 'conversion')
+      .where('YEAR(marketing.created_at) = :year', {
+        year: Number(targetDate.substring(0, 4)),
+      })
+      .andWhere('MONTH(marketing.created_at) = :month', {
+        month: Number(targetDate.substring(5, 7)),
+      })
+      .groupBy('marketing.brand_id')
+      .getRawMany();
+    return [salesByChannel, salesByType];
   }
 
   async getUsers(): Promise<KoreaUsers[]> {

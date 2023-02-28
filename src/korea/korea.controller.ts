@@ -1,4 +1,5 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { KoreaService } from './korea.service';
@@ -18,17 +19,18 @@ export class KoreaController {
   }
 
   @Get('/brand-sales')
-  getBrandSales(
-    @Query() brandSales: { today: string; type: string },
-  ): Promise<KoreaOrders[]> {
-    return this.koreaService.getBrandSales(brandSales);
+  getBrandSales(): Promise<KoreaOrders[][]> {
+    return this.koreaService.getBrandSales();
   }
 
-  @Get('/product-sales')
-  getProductSales(
-    @Query() productSales: { today: string; type: string },
-  ): Promise<KoreaOrders[]> {
-    return this.koreaService.getProductSales(productSales);
+  @Get('/product-sales/:dateText')
+  getProductSales(@Param('dateText') dateText: string): Promise<KoreaOrders[]> {
+    return this.koreaService.getProductSales(dateText);
+  }
+
+  @Get('/marketing')
+  getMarketing(): Promise<KoreaMarketing[][]> {
+    return this.koreaService.getMarketing();
   }
 
   @Get('/users')
