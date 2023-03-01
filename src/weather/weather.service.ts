@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Weather } from 'src/entities/weather.entity';
 import { Repository } from 'typeorm';
@@ -30,8 +30,8 @@ export class WeatherService {
       })
       .andWhere('date < :targetDay', {
         targetDay: DateTime.now()
-          .plus({ days: 7 })
           .minus({ years: 1 })
+          .plus({ days: 7 })
           .toFormat('yyyy-LL-dd'),
       })
       .getRawMany();
