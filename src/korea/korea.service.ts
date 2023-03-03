@@ -8,6 +8,7 @@ import { DateTime } from 'luxon';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { Suppliers } from 'src/entities/suppliers.entity';
+import { Costs } from 'src/entities/costs.entity';
 
 @Injectable()
 export class KoreaService {
@@ -24,7 +25,7 @@ export class KoreaService {
     const today = DateTime.now().toFormat('yyyy-LL-dd');
     const todayData = await this.koreaOrdersRepository
       .createQueryBuilder()
-      .select('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .select('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .addSelect('COUNT(DISTINCT(id))', 'order_count')
       .where('DATE(payment_date) = :today', {
         today: today,
@@ -32,10 +33,11 @@ export class KoreaService {
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('user_id != "mmzjapan"')
       .getRawMany();
     const monthlyData = await this.koreaOrdersRepository
       .createQueryBuilder()
-      .select('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .select('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .where('YEAR(payment_date) = :year', {
         year: Number(today.substring(0, 4)),
       })
@@ -45,6 +47,7 @@ export class KoreaService {
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('user_id != "mmzjapan"')
       .getRawOne();
     return [todayData, monthlyData];
   }
@@ -53,7 +56,7 @@ export class KoreaService {
     const thisYearData = await this.koreaOrdersRepository
       .createQueryBuilder()
       .select('DATE(payment_date)', 'payment_date')
-      .addSelect('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .where('DATE(payment_date) > :startDate', {
         startDate: DateTime.now().minus({ days: 14 }).toFormat('yyyy-LL-dd'),
       })
@@ -63,12 +66,13 @@ export class KoreaService {
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('user_id != "mmzjapan"')
       .groupBy('DATE(payment_date)')
       .getRawMany();
     const beforeYearData = await this.koreaOrdersRepository
       .createQueryBuilder()
       .select('DATE(payment_date)', 'payment_date')
-      .addSelect('SUM(sale_price) - SUM(discount_price)', 'sales_price')
+      .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .where('DATE(payment_date) > :startDate', {
         startDate: DateTime.now()
           .minus({ years: 1, days: 14 })
@@ -80,6 +84,7 @@ export class KoreaService {
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('user_id != "mmzjapan"')
       .groupBy('DATE(payment_date)')
       .getRawMany();
     return [thisYearData, beforeYearData];
@@ -106,6 +111,11 @@ export class KoreaService {
       .leftJoin(Products, 'product', 'orders.product_id = product.id')
       .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
       .leftJoin(Suppliers, 'supplier', 'brand.supplier_id = supplier.id')
+      .leftJoin(
+        Costs,
+        'cost',
+        'orders.product_variant_id = cost.product_variant_id',
+      )
       .select('product.brand_id', 'brand_id')
       .addSelect('brand.name', 'brand_name')
       .addSelect('brand.type', 'brand_type')
@@ -120,6 +130,10 @@ export class KoreaService {
         'ROUND(SUM((orders.sale_price - orders.discount_price) * orders.quantity * orders.commission_rate / 100))',
         'commission',
       )
+      .addSelect(
+        'SUM(IF(cost.cost IS NULL, 0, cost.cost) * orders.quantity)',
+        'cost',
+      )
       .addSelect('SUM(orders.mileage)', 'mileage')
       .addSelect('SUM(orders.order_coupon)', 'order_coupon')
       .addSelect('SUM(orders.product_coupon)', 'product_coupon')
@@ -133,6 +147,7 @@ export class KoreaService {
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('orders.user_id != "mmzjapan"')
       .groupBy('product.brand_id')
       .orderBy('sales_price', 'DESC')
       .getRawMany();
@@ -153,6 +168,11 @@ export class KoreaService {
       .createQueryBuilder('orders')
       .leftJoin(Products, 'product', 'orders.product_id = product.id')
       .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
+      .leftJoin(
+        Costs,
+        'cost',
+        'orders.product_variant_id = cost.product_variant_id',
+      )
       .select('product.name', 'product_name')
       .addSelect('product.image', 'image')
       .addSelect('brand.name', 'brand_name')
@@ -168,6 +188,10 @@ export class KoreaService {
         'commission',
       )
       .addSelect(
+        'SUM(IF(cost.cost IS NULL, 0, cost.cost) * orders.quantity)',
+        'cost',
+      )
+      .addSelect(
         'SUM(orders.mileage) + SUM(orders.order_coupon) + SUM(orders.product_coupon)',
         'expense',
       )
@@ -181,7 +205,8 @@ export class KoreaService {
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
-      .groupBy('product.id')
+      .andWhere('orders.user_id != "mmzjapan"')
+      .groupBy('orders.product_id')
       .orderBy('sales_price', 'DESC')
       .limit(8)
       .getRawMany();
@@ -273,6 +298,7 @@ export class KoreaService {
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('orders.user_id != "mmzjapan"')
       .groupBy('orders.is_first')
       .getRawMany();
     const userSaleTypeData = await this.koreaOrdersRepository
@@ -296,6 +322,7 @@ export class KoreaService {
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('orders.user_id != "mmzjapan"')
       .groupBy('orders.is_first')
       .groupBy('product.brand_id')
       .getRawMany();
