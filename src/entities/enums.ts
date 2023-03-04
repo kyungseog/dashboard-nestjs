@@ -40,6 +40,14 @@ export enum CouponType {
   order = 'order', //주문서쿠폰
 }
 
+export enum SquadType {
+  plannig_squad = '기획SQ',
+  consignment_squad = '위탁SQ',
+  strategic_squad = '전략카테고리SQ',
+  buying_squad = '매입SQ',
+  essential_squad = '무무즈에센셜SQ',
+}
+
 export enum CostType {
   packing = 'packing', //포장비
   delivery = 'delivery', //운반비

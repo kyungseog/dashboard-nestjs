@@ -23,12 +23,14 @@ export class KoreaService {
 
   async getSales(): Promise<KoreaOrders[]> {
     const today = DateTime.now().toFormat('yyyy-LL-dd');
+    const tomorrow = DateTime.now().plus({ days: 1 }).toFormat('yyyy-LL-dd');
     const todayData = await this.koreaOrdersRepository
       .createQueryBuilder()
       .select('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .addSelect('COUNT(DISTINCT(id))', 'order_count')
-      .where('DATE(payment_date) = :today', {
+      .where('payment_date BETWEEN :today AND :tomorrow', {
         today: today,
+        tomorrow: tomorrow,
       })
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -57,11 +59,9 @@ export class KoreaService {
       .createQueryBuilder()
       .select('DATE(payment_date)', 'payment_date')
       .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
-      .where('DATE(payment_date) > :startDate', {
-        startDate: DateTime.now().minus({ days: 14 }).toFormat('yyyy-LL-dd'),
-      })
-      .andWhere('DATE(payment_date) <= :today', {
-        today: DateTime.now().toFormat('yyyy-LL-dd'),
+      .where('payment_date BETWEEN :startDate AND :tomorrow', {
+        startDate: DateTime.now().minus({ days: 13 }).toFormat('yyyy-LL-dd'),
+        tomorrow: DateTime.now().plus({ days: 1 }).toFormat('yyyy-LL-dd'),
       })
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -73,13 +73,14 @@ export class KoreaService {
       .createQueryBuilder()
       .select('DATE(payment_date)', 'payment_date')
       .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
-      .where('DATE(payment_date) > :startDate', {
+      .where('payment_date BETWEEN :startDate AND :tomorrow', {
         startDate: DateTime.now()
-          .minus({ years: 1, days: 14 })
+          .minus({ years: 1, days: 13 })
           .toFormat('yyyy-LL-dd'),
-      })
-      .andWhere('DATE(payment_date) <= :today', {
-        today: DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd'),
+        tomorrow: DateTime.now()
+          .minus({ years: 1 })
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -94,8 +95,12 @@ export class KoreaService {
     let targetDay = '';
     if (dateText === 'today') {
       targetDay = DateTime.now().toFormat('yyyy-LL-dd');
-    } else {
+    } else if (dateText === 'yesterday') {
       targetDay = DateTime.now().minus({ days: 1 }).toFormat('yyyy-LL-dd');
+    } else if (dateText === 'last_7_days') {
+      targetDay = DateTime.now().minus({ days: 7 }).toFormat('yyyy-LL-dd');
+    } else if (dateText === 'last_14_days') {
+      targetDay = DateTime.now().minus({ days: 14 }).toFormat('yyyy-LL-dd');
     }
     const marketingFee = await this.koreaMarketingRepository
       .createQueryBuilder('marketing')
@@ -119,6 +124,7 @@ export class KoreaService {
       .select('product.brand_id', 'brand_id')
       .addSelect('brand.name', 'brand_name')
       .addSelect('brand.type', 'brand_type')
+      .addSelect('supplier.id', 'supplier_id')
       .addSelect('supplier.integration_name', 'supplier_name')
       .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
       .addSelect('SUM(orders.quantity)', 'quantity')
@@ -141,8 +147,11 @@ export class KoreaService {
         'IF(orders.channel = "shop", ROUND(SUM(orders.sale_price - orders.discount_price - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.032), ROUND(SUM(orders.sale_price - orders.discount_price - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.034))',
         'pg_expense',
       )
-      .where('DATE(orders.payment_date) = :targetDay', {
+      .where('orders.payment_date BETWEEN :targetDay AND :tomorrow', {
         targetDay: targetDay,
+        tomorrow: DateTime.fromISO(targetDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
