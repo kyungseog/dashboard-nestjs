@@ -18,6 +18,11 @@ export class KoreaController {
     return this.koreaService.getChartSales();
   }
 
+  @Get('/squad-sales')
+  getSquadSales(): Promise<KoreaOrders[][]> {
+    return this.koreaService.getSquadSales();
+  }
+
   @Get('/brand-sales/:dateText')
   getBrandSales(@Param('dateText') dateText: string): Promise<KoreaOrders[][]> {
     return this.koreaService.getBrandSales(dateText);
@@ -26,6 +31,13 @@ export class KoreaController {
   @Get('/product-sales/:dateText')
   getProductSales(@Param('dateText') dateText: string): Promise<KoreaOrders[]> {
     return this.koreaService.getProductSales(dateText);
+  }
+
+  @Get('/partner-sales/:dateText')
+  getPartnerSales(
+    @Param('dateText') dateText: string,
+  ): Promise<KoreaOrders[][]> {
+    return this.koreaService.getPartnerSales(dateText);
   }
 
   @Get('/marketing')

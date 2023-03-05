@@ -10,6 +10,7 @@ import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { Products } from 'src/entities/products.entity';
 import { KoreaController } from './korea.controller';
 import { KoreaService } from './korea.service';
+import { KoreaBudget } from 'src/entities/korea-budget.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { KoreaService } from './korea.service';
       KoreaDeliveries,
       KoreaMarketing,
       KoreaExpenses,
+      KoreaBudget,
       Products,
     ]),
   ],
