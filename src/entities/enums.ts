@@ -48,6 +48,13 @@ export enum SquadType {
   essential_squad = '무무즈에센셜SQ',
 }
 
+export enum SquadIdType {
+  consignment = 'consignment',
+  strategic = 'strategic',
+  buying = 'buying',
+  essential = 'essential',
+}
+
 export enum CostType {
   packing = 'packing', //포장비
   delivery = 'delivery', //운반비

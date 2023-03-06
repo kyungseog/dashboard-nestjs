@@ -1,10 +1,13 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { SquadType } from './enums';
+import { SquadIdType, SquadType } from './enums';
 
 @Entity()
 export class KoreaBudget extends BaseEntity {
   @PrimaryColumn({ type: 'enum', enum: SquadType })
-  squad: SquadType;
+  squad_name: SquadType;
+
+  @Column({ type: 'enum', enum: SquadIdType })
+  squad_id: SquadIdType;
 
   @PrimaryColumn('date')
   date: Date;
@@ -40,5 +43,11 @@ export class KoreaBudget extends BaseEntity {
   logistic_fixed_fee: number;
 
   @Column('int')
+  margin: number;
+
+  @Column('int')
   operation_fixed_fee: number;
+
+  @Column('int')
+  profit: number;
 }
