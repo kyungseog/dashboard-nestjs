@@ -1,13 +1,13 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { SquadIdType, SquadType } from './enums';
+import { SquadType } from './enums';
 
 @Entity()
 export class KoreaBudget extends BaseEntity {
-  @PrimaryColumn({ type: 'enum', enum: SquadType })
-  squad_name: SquadType;
+  @PrimaryColumn('char', { length: 100 })
+  squad_id: string;
 
-  @Column({ type: 'enum', enum: SquadIdType })
-  squad_id: SquadIdType;
+  @Column({ type: 'enum', enum: SquadType })
+  squad_name: SquadType;
 
   @PrimaryColumn('date')
   date: Date;

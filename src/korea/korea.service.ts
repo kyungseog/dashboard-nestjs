@@ -10,6 +10,7 @@ import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { Suppliers } from 'src/entities/suppliers.entity';
 import { Costs } from 'src/entities/costs.entity';
 import { KoreaBudget } from 'src/entities/korea-budget.entity';
+import { Squads } from 'src/entities/squads.entity';
 
 @Injectable()
 export class KoreaService {
@@ -115,7 +116,8 @@ export class KoreaService {
         'cost',
         'orders.product_variant_id = cost.product_variant_id',
       )
-      .select('brand.squad', 'squad')
+      .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
+      .select('squad.id', 'squad_id')
       .addSelect(
         'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
         'sales_price',
@@ -142,13 +144,15 @@ export class KoreaService {
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('squad.id IS NOT NULL')
       .andWhere('orders.user_id != "mmzjapan"')
-      .groupBy('brand.squad')
+      .groupBy('squad.id')
       .getRawMany();
     const marketingFee = await this.koreaMarketingRepository
       .createQueryBuilder('marketing')
       .leftJoin(Brands, 'brand', 'marketing.brand_id = brand.id')
-      .select('brand.squad', 'squad')
+      .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
+      .select('squad.id', 'squad_id')
       .addSelect('SUM(marketing.cost)', 'cost')
       .where('YEAR(marketing.created_at) = :year', {
         year: Number(targetDay.substring(0, 4)),
@@ -156,7 +160,8 @@ export class KoreaService {
       .andWhere('MONTH(marketing.created_at) = :month', {
         month: Number(targetDay.substring(5, 7)),
       })
-      .groupBy('brand.squad')
+      .andWhere('squad.id IS NOT NULL')
+      .groupBy('squad.id')
       .getRawMany();
     return [budgetData, actualData, marketingFee];
   }
