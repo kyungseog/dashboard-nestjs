@@ -322,7 +322,8 @@ export class KoreaService {
     const marketingFee = await this.koreaMarketingRepository
       .createQueryBuilder('marketing')
       .leftJoin(Brands, 'brand', 'marketing.brand_id = brand.id')
-      .select('brand.supplier_id', 'supplier_id')
+      .leftJoin(Suppliers, 'supplier', 'brand.supplier_id = supplier.id')
+      .select('supplier.integration_id', 'supplier_id')
       .addSelect('SUM(marketing.cost)', 'cost')
       .where('marketing.created_at BETWEEN :targetDay AND :tomorrow', {
         targetDay: targetDay,
@@ -330,7 +331,7 @@ export class KoreaService {
           .plus({ days: 1 })
           .toFormat('yyyy-LL-dd'),
       })
-      .groupBy('brand.supplier_id')
+      .groupBy('supplier.integration_id')
       .getRawMany();
     const partnerSalesData = await this.koreaOrdersRepository
       .createQueryBuilder('orders')
@@ -342,7 +343,7 @@ export class KoreaService {
         'cost',
         'orders.product_variant_id = cost.product_variant_id',
       )
-      .select('brand.supplier_id', 'supplier_id')
+      .select('supplier.integration_id', 'supplier_id')
       .addSelect('supplier.integration_name', 'supplier_name')
       .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
       .addSelect('SUM(orders.quantity)', 'quantity')
@@ -374,8 +375,9 @@ export class KoreaService {
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
+      .andWhere('supplier.integration_id != "1"')
       .andWhere('orders.user_id != "mmzjapan"')
-      .groupBy('supplier.integration_name')
+      .groupBy('supplier.integration_id')
       .orderBy('sales_price', 'DESC')
       .getRawMany();
     if (!partnerSalesData) {
@@ -403,6 +405,7 @@ export class KoreaService {
       .createQueryBuilder('marketing')
       .leftJoin(Brands, 'brand', 'marketing.brand_id = brand.id')
       .select('brand.id', 'brand_id')
+      .addSelect('brand.name', 'brand_name')
       .addSelect('SUM(marketing.cost)', 'cost')
       .addSelect('SUM(marketing.conversion)', 'conversion')
       .where('YEAR(marketing.created_at) = :year', {

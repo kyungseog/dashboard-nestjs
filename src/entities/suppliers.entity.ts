@@ -6,6 +6,9 @@ export class Suppliers extends BaseEntity {
   @PrimaryColumn('char', { length: 10 })
   id: string;
 
+  @Column('char', { length: 10 })
+  integration_id: string;
+
   @Column('varchar')
   integration_name: string;
 

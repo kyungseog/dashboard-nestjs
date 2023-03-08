@@ -12,6 +12,7 @@ import { KoreaController } from './korea.controller';
 import { KoreaService } from './korea.service';
 import { KoreaBudget } from 'src/entities/korea-budget.entity';
 import { Squads } from 'src/entities/squads.entity';
+import { KoreaIfdo } from 'src/entities/korea-ifdo.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Squads } from 'src/entities/squads.entity';
       KoreaBudget,
       Products,
       Squads,
+      KoreaIfdo,
     ]),
   ],
   controllers: [KoreaController],
