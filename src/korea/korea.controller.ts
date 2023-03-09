@@ -28,9 +28,27 @@ export class KoreaController {
     return this.koreaService.getBrandSales(dateText);
   }
 
-  @Get('/product-sales/:dateText')
-  getProductSales(@Param('dateText') dateText: string): Promise<KoreaOrders[]> {
-    return this.koreaService.getProductSales(dateText);
+  @Get('/brand-chart-sales/:brandId')
+  getBrandChartSales(
+    @Param('brandId') brandId: string,
+  ): Promise<KoreaOrders[][]> {
+    return this.koreaService.getBrandChartSales(brandId);
+  }
+
+  @Get('/brand-sales-detail/:brandId/:dateText')
+  getBrandDetail(
+    @Param('brandId') brandId: string,
+    @Param('dateText') dateText: string,
+  ): Promise<KoreaOrders[][]> {
+    return this.koreaService.getBrandDetail(brandId, dateText);
+  }
+
+  @Get('/product-sales/:brandId/:dateText')
+  getProductSales(
+    @Param('brandId') brandId: string,
+    @Param('dateText') dateText: string,
+  ): Promise<KoreaOrders[]> {
+    return this.koreaService.getProductSales(brandId, dateText);
   }
 
   @Get('/partner-sales/:dateText')
