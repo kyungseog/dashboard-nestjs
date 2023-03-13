@@ -34,11 +34,15 @@ export class LiveCommercesService {
       .createQueryBuilder('order')
       .leftJoinAndSelect(Products, 'product', 'order.product_id = product.id')
       .where('product.brand_id = :brand_id', { brand_id: brand_id })
-      .andWhere('order.payment_date > :start_datetime', {
-        start_datetime: start_datetime,
-      })
-      .andWhere('order.payment_date < :end_datetime', {
-        end_datetime: end_datetime,
+      .andWhere(
+        'order.payment_date BETWEEN :start_datetime AND :end_datetime',
+        {
+          start_datetime: start_datetime,
+          end_datetime: end_datetime,
+        },
+      )
+      .andWhere('order.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
       .getRawMany();
     if (!salesData) {
