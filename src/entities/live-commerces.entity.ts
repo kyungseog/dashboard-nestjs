@@ -17,6 +17,9 @@ export class LiveCommerces extends BaseEntity {
   @Column('char', { length: 10, nullable: true })
   event_sno: string;
 
+  @Column('int')
+  cost: number;
+
   @Column('datetime')
   start_date: Date;
 

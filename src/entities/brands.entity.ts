@@ -1,5 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
-import { BrandType, SupplierStatus } from './enums';
+import { BrandType, SquadType, SupplierStatus } from './enums';
 
 @Entity()
 export class Brands extends BaseEntity {
@@ -12,8 +12,14 @@ export class Brands extends BaseEntity {
   @Column({ type: 'enum', enum: BrandType })
   type: BrandType;
 
-  @Column('varchar', { nullable: true })
-  squad: string;
+  @Column('char', { nullable: true, length: 100 })
+  design_type: string;
+
+  @Column('char', { length: 50 })
+  sales_country: string;
+
+  @Column({ type: 'enum', enum: SquadType })
+  squad: SquadType;
 
   @Column('char', { nullable: true, length: 50 })
   manager_id: string;
@@ -26,6 +32,9 @@ export class Brands extends BaseEntity {
 
   @Column('date')
   created_at: Date;
+
+  @Column('date')
+  deleted_at: Date;
 
   @Column({ type: 'enum', enum: SupplierStatus })
   status_id: SupplierStatus;

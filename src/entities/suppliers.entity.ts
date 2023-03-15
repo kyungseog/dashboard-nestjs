@@ -15,6 +15,15 @@ export class Suppliers extends BaseEntity {
   @Column('varchar')
   name: string;
 
+  @Column('varchar', { nullable: true })
+  ceo: string;
+
+  @Column('varchar', { nullable: true })
+  registration_id: string;
+
+  @Column('varchar', { nullable: true })
+  email: string;
+
   @Column({ type: 'enum', enum: SupplierStatus })
   status_id: SupplierStatus;
 }
