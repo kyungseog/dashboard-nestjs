@@ -166,27 +166,15 @@ export class KoreaService {
     return [budgetData, actualData, marketingFee];
   }
 
-  async getBrandSales(dateText: string): Promise<KoreaOrders[][]> {
-    let startDay = '';
-    if (dateText === 'today') {
-      startDay = DateTime.now().toFormat('yyyy-LL-dd');
-    } else if (dateText === 'yesterday') {
-      startDay = DateTime.now().minus({ days: 1 }).toFormat('yyyy-LL-dd');
-    } else if (dateText === 'last_7_days') {
-      startDay = DateTime.now().minus({ days: 7 }).toFormat('yyyy-LL-dd');
-    } else if (dateText === 'last_14_days') {
-      startDay = DateTime.now().minus({ days: 14 }).toFormat('yyyy-LL-dd');
-    }
+  async getBrandSales(dateText): Promise<KoreaOrders[][]> {
+    const { startDay, endDay } = dateText;
     const marketingFee = await this.koreaMarketingRepository
       .createQueryBuilder('marketing')
       .select('marketing.brand_id', 'brand_id')
       .addSelect('SUM(marketing.cost)', 'cost')
       .where('marketing.created_at BETWEEN :startDay AND :endDay', {
-        startDay: startDay,
-        endDay:
-          dateText == 'today'
-            ? DateTime.now().plus({ days: 1 }).toFormat('yyyy-LL-dd')
-            : DateTime.now().toFormat('yyyy-LL-dd'),
+        startDay,
+        endDay,
       })
       .groupBy('marketing.brand_id')
       .getRawMany();
@@ -203,6 +191,7 @@ export class KoreaService {
       .select('product.brand_id', 'brand_id')
       .addSelect('brand.name', 'brand_name')
       .addSelect('brand.type', 'brand_type')
+      .addSelect('brand.manager_id', 'md_id')
       .addSelect('supplier.id', 'supplier_id')
       .addSelect('supplier.integration_name', 'supplier_name')
       .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
@@ -227,11 +216,8 @@ export class KoreaService {
         'pg_expense',
       )
       .where('orders.payment_date BETWEEN :startDay AND :endDay', {
-        startDay: startDay,
-        endDay:
-          dateText == 'today'
-            ? DateTime.now().plus({ days: 1 }).toFormat('yyyy-LL-dd')
-            : DateTime.now().toFormat('yyyy-LL-dd'),
+        startDay,
+        endDay,
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -240,10 +226,61 @@ export class KoreaService {
       .groupBy('product.brand_id')
       .orderBy('sales_price', 'DESC')
       .getRawMany();
-    if (!brandSalesData) {
-      throw new NotFoundException(`can't find brand sales datas`);
-    }
-    return [marketingFee, brandSalesData];
+    const logisticFee = await this.koreaOrdersRepository
+      .createQueryBuilder('order')
+      .leftJoin(Products, 'product', 'order.product_id = product.id')
+      .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
+      .leftJoin(Suppliers, 'supplier', 'brand.supplier_id = supplier.id')
+      .leftJoin(
+        (logiQuery) => {
+          return logiQuery
+            .select('logis.id', 'id')
+            .addSelect(
+              'ROUND((2746 + 2100 + 565) / COUNT(logis.id))',
+              'logistic_fixed',
+            )
+            .from((subQuery) => {
+              return subQuery
+                .select('order.id', 'id')
+                .addSelect('product.brand_id', 'brand_id')
+                .leftJoin(Products, 'product', 'order.product_id = product.id')
+                .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
+                .leftJoin(
+                  Suppliers,
+                  'supplier',
+                  'brand.supplier_id = supplier.id',
+                )
+                .where('order.payment_date BETWEEN :startDay AND :endDay', {
+                  startDay,
+                  endDay,
+                })
+                .andWhere('supplier.id = "1"')
+                .andWhere('order.status_id IN (:...ids)', {
+                  ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+                })
+                .groupBy('order.id, product.brand_id');
+            }, 'logis')
+            .groupBy('logis.id');
+        },
+        'logi',
+        'order.id = logi.id',
+      )
+      .select('product.brand_id', 'brand_id')
+      .addSelect(
+        'ROUND(SUM(order.quantity) * 52) + logi.logistic_fixed',
+        'logistic_fee',
+      )
+      .where('order.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('supplier.id = "1"')
+      .andWhere('order.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .groupBy('product.brand_id')
+      .getRawMany();
+    return [marketingFee, brandSalesData, logisticFee];
   }
 
   async getProductSales(
