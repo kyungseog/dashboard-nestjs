@@ -3,10 +3,14 @@ import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { KoreaService } from './korea.service';
+import { KoreaBrandService } from './korea-brand.service';
 
 @Controller('korea')
 export class KoreaController {
-  constructor(private koreaService: KoreaService) {}
+  constructor(
+    private koreaService: KoreaService,
+    private koreaBrandService: KoreaBrandService,
+  ) {}
 
   @Get('/sales')
   getSales(): Promise<KoreaOrders[]> {
@@ -25,14 +29,14 @@ export class KoreaController {
 
   @Get('/brand-sales')
   getBrandSales(@Query() dateText): Promise<KoreaOrders[][]> {
-    return this.koreaService.getBrandSales(dateText);
+    return this.koreaBrandService.getBrandSales(dateText);
   }
 
   @Get('/brand-chart-sales/:brandId')
   getBrandChartSales(
     @Param('brandId') brandId: string,
   ): Promise<KoreaOrders[][]> {
-    return this.koreaService.getBrandChartSales(brandId);
+    return this.koreaBrandService.getBrandChartSales(brandId);
   }
 
   @Get('/brand-sales-detail/:brandId/:dateText')
@@ -40,7 +44,7 @@ export class KoreaController {
     @Param('brandId') brandId: string,
     @Param('dateText') dateText: string,
   ): Promise<KoreaOrders[][]> {
-    return this.koreaService.getBrandDetail(brandId, dateText);
+    return this.koreaBrandService.getBrandDetail(brandId, dateText);
   }
 
   @Get('/product-sales/:brandId/:dateText')
@@ -72,19 +76,4 @@ export class KoreaController {
   getUserSaleType(): Promise<KoreaOrders[][]> {
     return this.koreaService.getUserSaleType();
   }
-
-  // @Get('/salesWeight')
-  // getSalesWeight(@Query() salesWeight): Promise<KoreaOrders[]> {
-  //   return this.koreaService.getSales(salesWeight);
-  // }
-
-  // @Get('/categorySalesWeight')
-  // getCategorySalesWeight(@Query() categorysalesWeight): Promise<KoreaOrders[]> {
-  //   return this.koreaService.getSales(categorysalesWeight);
-  // }
-
-  // @Get('/ageSalesWeight')
-  // getAgeSalesWeight(@Query() ageSalesWeight): Promise<KoreaOrders[]> {
-  //   return this.koreaService.getSales(ageSalesWeight);
-  // }
 }
