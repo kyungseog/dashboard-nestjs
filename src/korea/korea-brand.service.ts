@@ -8,7 +8,6 @@ import { DateTime } from 'luxon';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { Suppliers } from 'src/entities/suppliers.entity';
 import { Costs } from 'src/entities/costs.entity';
-import { stringify } from 'querystring';
 
 @Injectable()
 export class KoreaBrandService {
@@ -82,8 +81,29 @@ export class KoreaBrandService {
       .orderBy('sales_price', 'DESC')
       .getRawMany();
     const logisticFee = await this.dataSource.query(
-      `SELECT a.id FROM korea_orders a WHERE DATE(a.payment_date) = ?`,
-      ['2023-03-14'],
+      `SELECT tt.brand_id
+        , sum(tt.polybag) + sum(tt.logistic_fixed) AS logistic_fee
+      FROM (select a.id, b.brand_id, sum(a.quantity) * 52 as polybag, co.logistic_fixed
+        from management.korea_orders a
+          LEFT JOIN management.products b on a.product_id = b.id
+          LEFT JOIN management.brands c on b.brand_id = c.id
+          LEFT JOIN management.suppliers d on c.supplier_id = d.id
+          LEFT JOIN (
+            SELECT a.id, ROUND((2746 + 2100 + 565) / COUNT(a.id)) as logistic_fixed 
+            FROM management.korea_orders a
+              LEFT JOIN management.products b on a.product_id = b.id
+              LEFT JOIN management.brands c on b.brand_id = c.id
+              LEFT JOIN management.suppliers d on c.supplier_id = d.id
+            WHERE a.payment_date BETWEEN ? AND ?
+              AND d.id = '1' 
+              AND a.status_id IN ('p1','g1','d1','d2','s1')
+            GROUP BY a.id) co ON a.id = co.id
+      WHERE a.payment_date BETWEEN ? AND ? 
+        AND d.id = '1'
+        AND a.status_id IN ('p1','g1','d1','d2','s1')
+      GROUP BY a.id, b.brand_id) tt
+      group by tt.brand_id `,
+      [startDay, endDay, startDay, endDay],
     );
     return [marketingFee, brandSalesData, logisticFee];
   }
