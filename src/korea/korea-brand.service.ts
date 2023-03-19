@@ -8,6 +8,8 @@ import { DateTime } from 'luxon';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { Suppliers } from 'src/entities/suppliers.entity';
 import { Costs } from 'src/entities/costs.entity';
+import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
+import { LiveCommerces } from 'src/entities/live-commerces.entity';
 
 @Injectable()
 export class KoreaBrandService {
@@ -16,16 +18,20 @@ export class KoreaBrandService {
     private koreaOrdersRepository: Repository<KoreaOrders>,
     @InjectRepository(KoreaMarketing)
     private koreaMarketingRepository: Repository<KoreaMarketing>,
+    @InjectRepository(KoreaAllocationFees)
+    private koreaAllocaitonFeesRepository: Repository<KoreaAllocationFees>,
+    @InjectRepository(LiveCommerces)
+    private liveCommercesRepository: Repository<LiveCommerces>,
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
 
   async getBrandSales(dateText): Promise<KoreaOrders[][]> {
     const { startDay, endDay } = dateText;
-    const marketingFee = await this.koreaMarketingRepository
+    const marketingFee_d = await this.koreaMarketingRepository
       .createQueryBuilder('marketing')
       .select('marketing.brand_id', 'brand_id')
-      .addSelect('SUM(marketing.cost)', 'cost')
+      .addSelect('SUM(marketing.cost)', 'direct_marketing_fee')
       .where('marketing.created_at BETWEEN :startDay AND :endDay', {
         startDay,
         endDay,
@@ -80,32 +86,45 @@ export class KoreaBrandService {
       .groupBy('product.brand_id')
       .orderBy('sales_price', 'DESC')
       .getRawMany();
-    const logisticFee = await this.dataSource.query(
-      `SELECT tt.brand_id
-        , sum(tt.polybag) + sum(tt.logistic_fixed) AS logistic_fee
-      FROM (select a.id, b.brand_id, sum(a.quantity) * 52 as polybag, co.logistic_fixed
-        from management.korea_orders a
-          LEFT JOIN management.products b on a.product_id = b.id
-          LEFT JOIN management.brands c on b.brand_id = c.id
-          LEFT JOIN management.suppliers d on c.supplier_id = d.id
-          LEFT JOIN (
-            SELECT a.id, ROUND((2746 + 2100 + 565) / COUNT(a.id)) as logistic_fixed 
-            FROM management.korea_orders a
-              LEFT JOIN management.products b on a.product_id = b.id
-              LEFT JOIN management.brands c on b.brand_id = c.id
-              LEFT JOIN management.suppliers d on c.supplier_id = d.id
-            WHERE a.payment_date BETWEEN ? AND ?
-              AND d.id = '1' 
-              AND a.status_id IN ('p1','g1','d1','d2','s1')
-            GROUP BY a.id) co ON a.id = co.id
-      WHERE a.payment_date BETWEEN ? AND ? 
-        AND d.id = '1'
-        AND a.status_id IN ('p1','g1','d1','d2','s1')
-      GROUP BY a.id, b.brand_id) tt
-      group by tt.brand_id `,
-      [startDay, endDay, startDay, endDay],
-    );
-    return [marketingFee, brandSalesData, logisticFee];
+    const logisticFee = await this.koreaAllocaitonFeesRepository
+      .createQueryBuilder('fee')
+      .select('fee.brand_id', 'brand_id')
+      .addSelect('SUM(fee.allocated_fee)', 'logistic_fee')
+      .where('fee.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('fee.account = "logistic"')
+      .groupBy('fee.brand_id')
+      .getRawMany();
+    const marketingFee_i = await this.koreaAllocaitonFeesRepository
+      .createQueryBuilder('fee')
+      .select('fee.brand_id', 'brand_id')
+      .addSelect('SUM(fee.allocated_fee)', 'indirect_marketing_fee')
+      .where('fee.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('fee.account = "marketing"')
+      .groupBy('fee.brand_id')
+      .getRawMany();
+    const marketingFee_live = await this.liveCommercesRepository
+      .createQueryBuilder('live')
+      .select('live.brand_id', 'brand_id')
+      .addSelect('SUM(live.cost)', 'live_fee')
+      .where('live.start_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('live.brand_id')
+      .getRawMany();
+    return [
+      marketingFee_d,
+      brandSalesData,
+      logisticFee,
+      marketingFee_i,
+      marketingFee_live,
+    ];
   }
 
   async getBrandDetail(

@@ -94,3 +94,8 @@ export enum JapanDeliveryFeeType {
   add_fee = 'add_fee', //추가차감
   return_korea = 'return_korea', //한국반송료
 }
+
+export enum Account {
+  marketing = 'marketing',
+  logistic = 'logistic',
+}

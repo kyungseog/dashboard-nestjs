@@ -14,6 +14,8 @@ import { KoreaBudget } from 'src/entities/korea-budget.entity';
 import { Squads } from 'src/entities/squads.entity';
 import { KoreaIfdo } from 'src/entities/korea-ifdo.entity';
 import { KoreaBrandService } from './korea-brand.service';
+import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
+import { LiveCommerces } from 'src/entities/live-commerces.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { KoreaBrandService } from './korea-brand.service';
       Products,
       Squads,
       KoreaIfdo,
+      KoreaAllocationFees,
+      LiveCommerces,
     ]),
   ],
   controllers: [KoreaController],
