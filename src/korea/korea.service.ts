@@ -11,6 +11,8 @@ import { Suppliers } from 'src/entities/suppliers.entity';
 import { Costs } from 'src/entities/costs.entity';
 import { KoreaBudget } from 'src/entities/korea-budget.entity';
 import { Squads } from 'src/entities/squads.entity';
+import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
+import { LiveCommerces } from 'src/entities/live-commerces.entity';
 
 @Injectable()
 export class KoreaService {
@@ -23,6 +25,10 @@ export class KoreaService {
     private koreaUsersRepository: Repository<KoreaUsers>,
     @InjectRepository(KoreaMarketing)
     private koreaMarketingRepository: Repository<KoreaMarketing>,
+    @InjectRepository(KoreaAllocationFees)
+    private koreaAllocaitonFeesRepository: Repository<KoreaAllocationFees>,
+    @InjectRepository(LiveCommerces)
+    private liveCommercesRepository: Repository<LiveCommerces>,
   ) {}
 
   async getSales(): Promise<KoreaOrders[]> {
@@ -148,7 +154,7 @@ export class KoreaService {
       .andWhere('orders.user_id != "mmzjapan"')
       .groupBy('squad.id')
       .getRawMany();
-    const marketingFee = await this.koreaMarketingRepository
+    const marketingFee_d = await this.koreaMarketingRepository
       .createQueryBuilder('marketing')
       .leftJoin(Brands, 'brand', 'marketing.brand_id = brand.id')
       .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
@@ -163,7 +169,61 @@ export class KoreaService {
       .andWhere('squad.id IS NOT NULL')
       .groupBy('squad.id')
       .getRawMany();
-    return [budgetData, actualData, marketingFee];
+    const marketingFee_i = await this.koreaAllocaitonFeesRepository
+      .createQueryBuilder('fee')
+      .leftJoin(Brands, 'brand', 'fee.brand_id = brand.id')
+      .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
+      .select('squad.id', 'squad_id')
+      .addSelect('SUM(fee.allocated_fee)', 'indirect_marketing_fee')
+      .where('YEAR(fee.created_at) = :year', {
+        year: Number(targetDay.substring(0, 4)),
+      })
+      .andWhere('MONTH(fee.created_at) = :month', {
+        month: Number(targetDay.substring(5, 7)),
+      })
+      .andWhere('fee.account = "marketing"')
+      .andWhere('squad.id IS NOT NULL')
+      .groupBy('squad.id')
+      .getRawMany();
+    const marketingFee_live = await this.liveCommercesRepository
+      .createQueryBuilder('live')
+      .leftJoin(Brands, 'brand', 'live.brand_id = brand.id')
+      .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
+      .select('squad.id', 'squad_id')
+      .addSelect('SUM(live.cost)', 'live_fee')
+      .where('YEAR(live.start_date) = :year', {
+        year: Number(targetDay.substring(0, 4)),
+      })
+      .andWhere('MONTH(live.start_date) = :month', {
+        month: Number(targetDay.substring(5, 7)),
+      })
+      .andWhere('squad.id IS NOT NULL')
+      .groupBy('squad.id')
+      .getRawMany();
+    const logisticFee = await this.koreaAllocaitonFeesRepository
+      .createQueryBuilder('fee')
+      .leftJoin(Brands, 'brand', 'fee.brand_id = brand.id')
+      .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
+      .select('squad.id', 'squad_id')
+      .addSelect('SUM(fee.allocated_fee)', 'logistic_fee')
+      .where('YEAR(fee.created_at) = :year', {
+        year: Number(targetDay.substring(0, 4)),
+      })
+      .andWhere('MONTH(fee.created_at) = :month', {
+        month: Number(targetDay.substring(5, 7)),
+      })
+      .andWhere('fee.account = "logistic"')
+      .andWhere('squad.id IS NOT NULL')
+      .groupBy('squad.id')
+      .getRawMany();
+    return [
+      budgetData,
+      actualData,
+      marketingFee_d,
+      marketingFee_i,
+      marketingFee_live,
+      logisticFee,
+    ];
   }
 
   async getProductSales(
@@ -399,7 +459,35 @@ export class KoreaService {
       })
       .groupBy('marketing.brand_id')
       .getRawMany();
-    return [salesByChannel, salesByType];
+    const yearlyTotalMarketingFee = await this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .select('SUM(marketing.cost)', 'cost')
+      .where('marketing.created_at BETWEEN :startDay AND :endDay', {
+        startDay: '2023-01-01',
+        endDay: targetDate,
+      })
+      .getRawOne();
+    const yearlyTotalSales = await this.koreaOrdersRepository
+      .createQueryBuilder('order')
+      .select(
+        'SUM((order.sale_price - order.discount_price) * order.quantity)',
+        'sales_price',
+      )
+      .where('order.payment_date BETWEEN :startDay AND :endDay', {
+        startDay: '2023-01-01',
+        endDay: targetDate,
+      })
+      .andWhere('order.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('order.user_id != "mmzjapan"')
+      .getRawOne();
+    return [
+      salesByChannel,
+      salesByType,
+      yearlyTotalMarketingFee,
+      yearlyTotalSales,
+    ];
   }
 
   async getUsers(): Promise<KoreaUsers[]> {
