@@ -112,10 +112,7 @@ export class KoreaBrandService {
       .createQueryBuilder('live')
       .select('live.brand_id', 'brand_id')
       .addSelect('SUM(live.cost)', 'live_fee')
-      .where('live.start_date BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay,
-      })
+      .where('live.start_date = :startDay', { startDay })
       .groupBy('live.brand_id')
       .getRawMany();
     return [

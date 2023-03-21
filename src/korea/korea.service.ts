@@ -477,10 +477,10 @@ export class KoreaService {
         startDay: '2023-01-01',
         endDay: targetDate,
       })
+      .andWhere('order.user_id != "mmzjapan"')
       .andWhere('order.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
-      .andWhere('order.user_id != "mmzjapan"')
       .getRawOne();
     return [
       salesByChannel,
