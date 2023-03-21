@@ -16,6 +16,7 @@ import { KoreaIfdo } from 'src/entities/korea-ifdo.entity';
 import { KoreaBrandService } from './korea-brand.service';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
 import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaMarketingService } from './korea-marketing.service';
 
 @Module({
   imports: [
@@ -36,6 +37,6 @@ import { LiveCommerces } from 'src/entities/live-commerces.entity';
     ]),
   ],
   controllers: [KoreaController],
-  providers: [KoreaService, KoreaBrandService],
+  providers: [KoreaService, KoreaBrandService, KoreaMarketingService],
 })
 export class KoreaModule {}

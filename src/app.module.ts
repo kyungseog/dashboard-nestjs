@@ -13,6 +13,7 @@ import { AccountingModule } from './accounting/accounting.module';
 import { ormConfig } from './orm.config';
 import { WeatherModule } from './weather/weather.module';
 import { PartnersModule } from './partners/partners.module';
+import { SquadModule } from './squad/squad.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PartnersModule } from './partners/partners.module';
     AccountingModule,
     WeatherModule,
     PartnersModule,
+    SquadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

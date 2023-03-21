@@ -1,15 +1,16 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { KoreaService } from './korea.service';
 import { KoreaBrandService } from './korea-brand.service';
+import { KoreaMarketingService } from './korea-marketing.service';
 
 @Controller('korea')
 export class KoreaController {
   constructor(
     private koreaService: KoreaService,
     private koreaBrandService: KoreaBrandService,
+    private koreaMarketingService: KoreaMarketingService,
   ) {}
 
   @Get('/sales')
@@ -20,11 +21,6 @@ export class KoreaController {
   @Get('/chart-sales')
   getChartSales(): Promise<KoreaOrders[][]> {
     return this.koreaService.getChartSales();
-  }
-
-  @Get('/squad-sales')
-  getSquadSales(): Promise<KoreaOrders[][]> {
-    return this.koreaService.getSquadSales();
   }
 
   @Get('/brand-sales')
@@ -62,9 +58,14 @@ export class KoreaController {
     return this.koreaService.getPartnerSales(dateText);
   }
 
-  @Get('/marketing')
-  getMarketing(): Promise<KoreaMarketing[][]> {
-    return this.koreaService.getMarketing();
+  @Get('/marketing/salesBy')
+  getMarketingSalesBy(): Promise<{ byChannel: any[]; byType: any[] }> {
+    return this.koreaMarketingService.getMarketingSalesBy();
+  }
+
+  @Get('/marketing/yearly')
+  getMarketingYearly(): Promise<{ totalMarketingFee: any; totalSales: any }> {
+    return this.koreaMarketingService.getMarketingYearly();
   }
 
   @Get('/users')
