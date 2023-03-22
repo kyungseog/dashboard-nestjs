@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { SquadService } from './squad.service';
 
@@ -12,8 +12,19 @@ export class SquadController {
   }
 
   @Get('/:id/sales')
-  getSalesById(@Param('id') id: string): Promise<{ target: any }> {
-    return this.koreaService.getSalesById(id);
+  getSalesById(
+    @Param('id') id: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<{
+    budget: any;
+    actual: any[];
+    directMarketing: any;
+    indirectMarketing: any;
+    liveMarketing: any;
+    logistic: any;
+  }> {
+    return this.koreaService.getSalesById(id, startDay, endDay);
   }
 
   @Get('/:id/brands')
