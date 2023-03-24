@@ -68,7 +68,7 @@ export class KoreaMarketingService {
       .createQueryBuilder('marketing')
       .select('SUM(marketing.cost)', 'cost')
       .where('marketing.created_at BETWEEN :startDay AND :endDay', {
-        startDay: '2023-01-01',
+        startDay: DateTime.now().startOf('year').toFormat('yyyy-LL-dd'),
         endDay: targetDate,
       })
       .getRawOne();
@@ -79,7 +79,7 @@ export class KoreaMarketingService {
         'sales_price',
       )
       .where('order.payment_date BETWEEN :startDay AND :endDay', {
-        startDay: '2023-01-01',
+        startDay: DateTime.now().startOf('year').toFormat('yyyy-LL-dd'),
         endDay: targetDate,
       })
       .andWhere('order.user_id != "mmzjapan"')

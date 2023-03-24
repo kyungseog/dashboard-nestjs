@@ -167,7 +167,7 @@ export class SquadService {
   }> {
     const budget = await this.koreaBudgetRepository
       .createQueryBuilder('budget')
-      .select('SUM(budget.sale_sales', 'sales')
+      .select('SUM(budget.sale_sales)', 'sales')
       .where('budget.date BETWEEN :startDay AND :endDay', {
         startDay,
         endDay,
@@ -205,7 +205,7 @@ export class SquadService {
         'IF(orders.channel = "shop", ROUND(SUM((orders.sale_price - orders.discount_price) * orders.quantity - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.032), ROUND(SUM((orders.sale_price - orders.discount_price) * orders.quantity - orders.mileage - orders.order_coupon - orders.product_coupon) * 0.034))',
         'pg_expense',
       )
-      .where('orders.payment_date BETWEEN :startDay AND :endDat', {
+      .where('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
         endDay: DateTime.fromISO(endDay)
           .plus({ days: 1 })
