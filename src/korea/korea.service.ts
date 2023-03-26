@@ -69,7 +69,7 @@ export class KoreaService {
       .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .where('payment_date BETWEEN :startDate AND :tomorrow', {
         startDate: DateTime.now().minus({ days: 13 }).toFormat('yyyy-LL-dd'),
-        tomorrow: DateTime.now().plus({ days: 1 }).toFormat('yyyy-LL-dd'),
+        tomorrow: DateTime.now().plus({ days: 8 }).toFormat('yyyy-LL-dd'),
       })
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -87,8 +87,14 @@ export class KoreaService {
           .toFormat('yyyy-LL-dd'),
         tomorrow: DateTime.now()
           .minus({ years: 1 })
-          .plus({ days: 1 })
+          .plus({ days: 8 })
           .toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('payment_date != :exceptDate', {
+        exceptDate: DateTime.now()
+          .minus({ years: 1 })
+          .plus({ days: 8 })
+          .toFormat('yyyy-LL-dd 00:00:00'),
       })
       .andWhere('status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
