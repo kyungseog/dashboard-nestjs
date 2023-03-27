@@ -15,7 +15,10 @@ export class LiveCommerces extends BaseEntity {
   brand_id: string;
 
   @Column('char', { length: 10, nullable: true })
-  event_sno: string;
+  live_page_sno: string;
+
+  @Column('char', { length: 10, nullable: true })
+  brand_page_sno: string;
 
   @Column('int')
   cost: number;
