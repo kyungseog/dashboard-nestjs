@@ -51,6 +51,7 @@ export class KoreaBrandService {
       .select('product.brand_id', 'brand_id')
       .addSelect('brand.name', 'brand_name')
       .addSelect('brand.type', 'brand_type')
+      .addSelect('brand.squad', 'brand_squad')
       .addSelect('brand.manager_id', 'md_id')
       .addSelect('supplier.id', 'supplier_id')
       .addSelect('supplier.integration_name', 'supplier_name')
