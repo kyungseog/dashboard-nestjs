@@ -4,6 +4,9 @@ import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { KoreaService } from './korea.service';
 import { KoreaBrandService } from './korea-brand.service';
 import { KoreaMarketingService } from './korea-marketing.service';
+import { MarketingService } from './marketing.service';
+import { BrandService } from './brand.service';
+import { ProductService } from './product.service';
 
 @Controller('korea')
 export class KoreaController {
@@ -11,11 +14,22 @@ export class KoreaController {
     private koreaService: KoreaService,
     private koreaBrandService: KoreaBrandService,
     private koreaMarketingService: KoreaMarketingService,
+    private marketingService: MarketingService,
+    private brandService: BrandService,
+    private productService: ProductService,
   ) {}
 
   @Get('/sales')
   getSales(): Promise<KoreaOrders[]> {
     return this.koreaService.getSales();
+  }
+
+  @Get('/sales/monthly')
+  async getSalesByMonthly(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<any[]> {
+    return await this.koreaService.getSalesByMonthly(startDay, endDay);
   }
 
   @Get('/chart-sales')
@@ -76,5 +90,52 @@ export class KoreaController {
   @Get('/user-sale-type')
   getUserSaleType(): Promise<KoreaOrders[][]> {
     return this.koreaService.getUserSaleType();
+  }
+
+  @Get('/marketing')
+  async getMarketingFee(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    const directMarketingFee =
+      await this.marketingService.getDirectMarketingFee(startDay, endDay);
+    const indirectMarketingFee =
+      await this.marketingService.getIndirectMarketingFee(startDay, endDay);
+    const liveMarketingFee = await this.marketingService.getLiveMarketingFee(
+      startDay,
+    );
+    return { directMarketingFee, indirectMarketingFee, liveMarketingFee };
+  }
+
+  @Get('/marketing/channel')
+  async getMarketingFeeByChannel(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<any[]> {
+    return await this.marketingService.getMarketingFeeByChannel(
+      startDay,
+      endDay,
+    );
+  }
+
+  @Get('/brand')
+  async getBrandSalesTest(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    const brandSales = await this.brandService.getBrandSales(startDay, endDay);
+    return { brandSales };
+  }
+
+  @Get('/product')
+  async getProductSalesTest(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    const productSales = await this.productService.getProductSales(
+      startDay,
+      endDay,
+    );
+    return { productSales };
   }
 }

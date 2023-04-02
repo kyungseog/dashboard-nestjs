@@ -62,6 +62,26 @@ export class KoreaService {
     return [todayData, monthlyData];
   }
 
+  getSalesByMonthly(startDay: string, endDay: string) {
+    return this.koreaOrdersRepository
+      .createQueryBuilder('order')
+      .select('DATE(order.payment_date)', 'payment_date')
+      .addSelect(
+        'SUM((order.sale_price - order.discount_price) * order.quantity)',
+        'sales_price',
+      )
+      .where('order.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('user_id != "mmzjapan"')
+      .groupBy('DATE(order.payment_date)')
+      .getRawMany();
+  }
+
   async getChartSales(): Promise<KoreaOrders[][]> {
     const thisYearData = await this.koreaOrdersRepository
       .createQueryBuilder()
