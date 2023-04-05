@@ -124,7 +124,11 @@ export class KoreaController {
     @Query('endDay') endDay: string,
   ): Promise<object> {
     const brandSales = await this.brandService.getBrandSales(startDay, endDay);
-    return { brandSales };
+    const productSalesByBrand = await this.brandService.getProductSalesByBrand(
+      startDay,
+      endDay,
+    );
+    return { brandSales, productSalesByBrand };
   }
 
   @Get('/product')

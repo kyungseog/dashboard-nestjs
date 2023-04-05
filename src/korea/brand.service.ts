@@ -71,6 +71,24 @@ export class BrandService {
       .getRawMany();
   }
 
+  getProductSalesByBrand(startDay: string, endDay: string) {
+    return this.brandQuery
+      .addSelect('product.id', 'product_id')
+      .addSelect('product.image', 'image')
+      .addSelect('product.name', 'product_name')
+      .where('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('orders.user_id != "mmzjapan"')
+      .groupBy('product.brand_id, product.id')
+      .orderBy('sales_price', 'DESC')
+      .getRawMany();
+  }
+
   async getBrandChartSales(brandId: string): Promise<KoreaOrders[][]> {
     const thisYearData = await this.koreaOrdersRepository
       .createQueryBuilder('orders')

@@ -54,7 +54,7 @@ export class MarketingService {
       .select('live.brand_id', 'brand_id')
       .addSelect('SUM(live.cost)', 'live_fee')
       .where('live.start_date = :startDay', { startDay })
-      .groupBy('DATE(live.start_date, live.brand_id')
+      .groupBy('DATE(live.start_date), live.brand_id')
       .getRawMany();
   }
 
