@@ -366,6 +366,7 @@ export class KoreaService {
       .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
       .select('orders.is_first', 'is_first')
       .addSelect('COUNT(DISTINCT(orders.user_id))', 'user_count')
+      .addSelect('SUM(orders.quantity)', 'quantity')
       .addSelect(
         'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
         'sales_price',
@@ -388,6 +389,7 @@ export class KoreaService {
       .addSelect('brand.name', 'brand_name')
       .addSelect('orders.is_first', 'is_first')
       .addSelect('COUNT(DISTINCT(orders.user_id))', 'user_count')
+      .addSelect('SUM(orders.quantity)', 'quantity')
       .addSelect(
         'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
         'sales_price',

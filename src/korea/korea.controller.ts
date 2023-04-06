@@ -7,6 +7,7 @@ import { KoreaMarketingService } from './korea-marketing.service';
 import { MarketingService } from './marketing.service';
 import { BrandService } from './brand.service';
 import { ProductService } from './product.service';
+import { LogisticService } from './logistic.service';
 
 @Controller('korea')
 export class KoreaController {
@@ -17,6 +18,7 @@ export class KoreaController {
     private marketingService: MarketingService,
     private brandService: BrandService,
     private productService: ProductService,
+    private logisticService: LogisticService,
   ) {}
 
   @Get('/sales')
@@ -118,6 +120,28 @@ export class KoreaController {
     );
   }
 
+  @Get('/marketing/brand')
+  async getMarketingFeeByBrand(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    const directMarketingFeeByBrand =
+      await this.marketingService.getDirectMarketingFeeByBrand(
+        startDay,
+        endDay,
+      );
+    const indirectMarketingFee =
+      await this.marketingService.getIndirectMarketingFee(startDay, endDay);
+    const liveMarketingFee = await this.marketingService.getLiveMarketingFee(
+      startDay,
+    );
+    return {
+      directMarketingFeeByBrand,
+      indirectMarketingFee,
+      liveMarketingFee,
+    };
+  }
+
   @Get('/brand')
   async getBrandSalesTest(
     @Query('startDay') startDay: string,
@@ -141,5 +165,17 @@ export class KoreaController {
       endDay,
     );
     return { productSales };
+  }
+
+  @Get('/logistic')
+  async getLogisticFee(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    const logisticFee = await this.logisticService.getLogisticFee(
+      startDay,
+      endDay,
+    );
+    return { logisticFee };
   }
 }

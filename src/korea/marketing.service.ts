@@ -32,6 +32,21 @@ export class MarketingService {
       .getRawMany();
   }
 
+  getDirectMarketingFeeByBrand(startDay: string, endDay: string) {
+    return this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .select('marketing.created_at', 'created_at')
+      .addSelect('marketing.brand_id', 'brand_id')
+      .addSelect('marketing.channel', 'channel')
+      .addSelect('SUM(marketing.cost)', 'direct_marketing_fee')
+      .where('marketing.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('marketing.created_at, marketing.brand_id, marketing.channel')
+      .getRawMany();
+  }
+
   getIndirectMarketingFee(startDay: string, endDay: string) {
     return this.koreaAllocaitonFeesRepository
       .createQueryBuilder('fee')
@@ -55,21 +70,6 @@ export class MarketingService {
       .addSelect('SUM(live.cost)', 'live_fee')
       .where('live.start_date = :startDay', { startDay })
       .groupBy('DATE(live.start_date), live.brand_id')
-      .getRawMany();
-  }
-
-  getLogisticFee(startDay: string, endDay: string) {
-    return this.koreaAllocaitonFeesRepository
-      .createQueryBuilder('fee')
-      .select('fee.created_at', 'created_at')
-      .addSelect('fee.brand_id', 'brand_id')
-      .addSelect('SUM(fee.allocated_fee)', 'logistic_fee')
-      .where('fee.created_at BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay,
-      })
-      .andWhere('fee.account = "logistic"')
-      .groupBy('fee.created_at, fee.brand_id')
       .getRawMany();
   }
 
