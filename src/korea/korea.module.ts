@@ -21,6 +21,7 @@ import { MarketingService } from './marketing.service';
 import { BrandService } from './brand.service';
 import { ProductService } from './product.service';
 import { LogisticService } from './logistic.service';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { LogisticService } from './logistic.service';
     BrandService,
     ProductService,
     LogisticService,
+    UserService,
   ],
 })
 export class KoreaModule {}

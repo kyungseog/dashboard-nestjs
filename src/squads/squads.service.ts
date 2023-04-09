@@ -13,7 +13,7 @@ import { Costs } from 'src/entities/costs.entity';
 import { Squads } from 'src/entities/squads.entity';
 
 @Injectable()
-export class SquadService {
+export class SquadsService {
   constructor(
     @InjectRepository(KoreaOrders)
     private koreaOrdersRepository: Repository<KoreaOrders>,

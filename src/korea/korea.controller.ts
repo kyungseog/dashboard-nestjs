@@ -8,6 +8,7 @@ import { MarketingService } from './marketing.service';
 import { BrandService } from './brand.service';
 import { ProductService } from './product.service';
 import { LogisticService } from './logistic.service';
+import { UserService } from './user.service';
 
 @Controller('korea')
 export class KoreaController {
@@ -19,29 +20,20 @@ export class KoreaController {
     private brandService: BrandService,
     private productService: ProductService,
     private logisticService: LogisticService,
+    private userService: UserService,
   ) {}
 
   @Get('/sales')
-  getSales(): Promise<KoreaOrders[]> {
-    return this.koreaService.getSales();
-  }
-
-  @Get('/sales/monthly')
-  async getSalesByMonthly(
+  async getSales(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
-  ): Promise<any[]> {
-    return await this.koreaService.getSalesByMonthly(startDay, endDay);
-  }
-
-  @Get('/chart-sales')
-  getChartSales(): Promise<KoreaOrders[][]> {
-    return this.koreaService.getChartSales();
-  }
-
-  @Get('/brand-sales')
-  getBrandSales(@Query() dateText): Promise<KoreaOrders[][]> {
-    return this.koreaBrandService.getBrandSales(dateText);
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.koreaService.getSalesByPeriod(startDay, endDay);
+    } else {
+      return await this.koreaService.getSalesByDay(startDay, endDay);
+    }
   }
 
   @Get('/brand-chart-sales/:brandId')
@@ -74,85 +66,126 @@ export class KoreaController {
     return this.koreaService.getPartnerSales(dateText);
   }
 
-  @Get('/marketing/salesBy')
-  getMarketingSalesBy(): Promise<{ byChannel: any[]; byType: any[] }> {
-    return this.koreaMarketingService.getMarketingSalesBy();
-  }
-
-  @Get('/marketing/yearly')
-  getMarketingYearly(): Promise<{ totalMarketingFee: any; totalSales: any }> {
-    return this.koreaMarketingService.getMarketingYearly();
-  }
-
   @Get('/users')
-  getUsers(): Promise<KoreaUsers[]> {
-    return this.koreaService.getUsers();
+  async getUsers(
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.userService.getUsersByPeriod(startDay, endDay);
+    } else {
+      return await this.userService.getUsersByDay(startDay, endDay);
+    }
   }
 
   @Get('/user-sale-type')
   getUserSaleType(): Promise<KoreaOrders[][]> {
-    return this.koreaService.getUserSaleType();
+    return this.userService.getUserSaleType();
   }
 
   @Get('/marketing')
   async getMarketingFee(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    const directMarketingFee =
-      await this.marketingService.getDirectMarketingFee(startDay, endDay);
-    const indirectMarketingFee =
-      await this.marketingService.getIndirectMarketingFee(startDay, endDay);
-    const liveMarketingFee = await this.marketingService.getLiveMarketingFee(
-      startDay,
-    );
-    return { directMarketingFee, indirectMarketingFee, liveMarketingFee };
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.marketingService.getFeeByPeriod(startDay, endDay);
+    } else {
+      return await this.marketingService.getFeeByDay(startDay, endDay);
+    }
+  }
+
+  @Get('/marketing/indirect')
+  async getIndirectMarketingFee(
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.marketingService.getIndirectByPeriod(startDay, endDay);
+    } else {
+      return await this.marketingService.getIndirectByDay(startDay, endDay);
+    }
   }
 
   @Get('/marketing/channel')
   async getMarketingFeeByChannel(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
-  ): Promise<any[]> {
-    return await this.marketingService.getMarketingFeeByChannel(
-      startDay,
-      endDay,
-    );
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.marketingService.getChannelByPeriod(startDay, endDay);
+    } else {
+      return await this.marketingService.getChannelByDay(startDay, endDay);
+    }
   }
 
   @Get('/marketing/brand')
-  async getMarketingFeeByBrand(
+  async getMarketingByBrand(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    const directMarketingFeeByBrand =
-      await this.marketingService.getDirectMarketingFeeByBrand(
+    if (sumType === 'period' || sumType == undefined) {
+      const direct = await this.marketingService.getDirectByBrandPeriod(
         startDay,
         endDay,
       );
-    const indirectMarketingFee =
-      await this.marketingService.getIndirectMarketingFee(startDay, endDay);
-    const liveMarketingFee = await this.marketingService.getLiveMarketingFee(
-      startDay,
-    );
-    return {
-      directMarketingFeeByBrand,
-      indirectMarketingFee,
-      liveMarketingFee,
-    };
+      const indirect = await this.marketingService.getIndirectByBrandPeriod(
+        startDay,
+        endDay,
+      );
+      return {
+        direct,
+        indirect,
+      };
+    } else {
+      const direct = await this.marketingService.getDirectByBrandDay(
+        startDay,
+        endDay,
+      );
+      const indirect = await this.marketingService.getIndirectByBrandDay(
+        startDay,
+        endDay,
+      );
+      return {
+        direct,
+        indirect,
+      };
+    }
   }
 
   @Get('/brand')
-  async getBrandSalesTest(
+  async getBrandSales(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    const brandSales = await this.brandService.getBrandSales(startDay, endDay);
-    const productSalesByBrand = await this.brandService.getProductSalesByBrand(
-      startDay,
-      endDay,
-    );
-    return { brandSales, productSalesByBrand };
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.brandService.getSalesByPeriod(startDay, endDay);
+    } else {
+      return await this.brandService.getSalesByDay(startDay, endDay);
+    }
+  }
+
+  @Get('/brand/product')
+  async getProductSalesByBrand(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    return await this.brandService.getProductSalesByBrand(startDay, endDay);
+  }
+
+  @Get('/brand/marketing')
+  async getBrandByMarketing(
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    return await this.getMarketingByBrand(sumType, startDay, endDay);
   }
 
   @Get('/product')
@@ -169,13 +202,27 @@ export class KoreaController {
 
   @Get('/logistic')
   async getLogisticFee(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    const logisticFee = await this.logisticService.getLogisticFee(
-      startDay,
-      endDay,
-    );
-    return { logisticFee };
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.logisticService.getFeeByPeriod(startDay, endDay);
+    } else {
+      return await this.logisticService.getFeeByDay(startDay, endDay);
+    }
+  }
+
+  @Get('/logistic/brand')
+  async getLogisticByBrand(
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.logisticService.getFeeByBrandPeriod(startDay, endDay);
+    } else {
+      return await this.logisticService.getFeeByBrandDay(startDay, endDay);
+    }
   }
 }

@@ -4,6 +4,7 @@ import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { Products } from 'src/entities/products.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Costs } from 'src/entities/costs.entity';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class ProductService {
@@ -52,7 +53,9 @@ export class ProductService {
     return this.productQuery
       .where('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
-        endDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],

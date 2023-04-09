@@ -7,8 +7,8 @@ import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { LiveCommerces } from 'src/entities/live-commerces.entity';
 import { Products } from 'src/entities/products.entity';
 import { Squads } from 'src/entities/squads.entity';
-import { SquadController } from './squad.controller';
-import { SquadService } from './squad.service';
+import { SquadsController } from './squads.controller';
+import { SquadsService } from './squads.service';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { SquadService } from './squad.service';
       LiveCommerces,
     ]),
   ],
-  controllers: [SquadController],
-  providers: [SquadService],
+  controllers: [SquadsController],
+  providers: [SquadsService],
 })
-export class SquadModule {}
+export class SquadsModule {}

@@ -1,10 +1,10 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
-import { SquadService } from './squad.service';
+import { SquadsService } from './squads.service';
 
-@Controller('squad')
-export class SquadController {
-  constructor(private koreaService: SquadService) {}
+@Controller('squads')
+export class SquadsController {
+  constructor(private koreaService: SquadsService) {}
 
   @Get('/sales')
   getSales(): Promise<KoreaOrders[][]> {

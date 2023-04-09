@@ -10,6 +10,13 @@ import { Costs } from 'src/entities/costs.entity';
 
 @Injectable()
 export class BrandService {
+  constructor(
+    @InjectRepository(KoreaOrders)
+    private koreaOrdersRepository: Repository<KoreaOrders>,
+    @InjectDataSource()
+    private dataSource: DataSource,
+  ) {}
+
   brandQuery = this.koreaOrdersRepository
     .createQueryBuilder('orders')
     .leftJoin(Products, 'product', 'orders.product_id = product.id')
@@ -49,24 +56,37 @@ export class BrandService {
       'pg_expense',
     );
 
-  constructor(
-    @InjectRepository(KoreaOrders)
-    private koreaOrdersRepository: Repository<KoreaOrders>,
-    @InjectDataSource()
-    private dataSource: DataSource,
-  ) {}
-
-  getBrandSales(startDay: string, endDay: string) {
+  getSalesByPeriod(startDay: string, endDay: string) {
     return this.brandQuery
       .where('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
-        endDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
       .andWhere('orders.user_id != "mmzjapan"')
       .groupBy('product.brand_id')
+      .orderBy('sales_price', 'DESC')
+      .getRawMany();
+  }
+
+  getSalesByDay(startDay: string, endDay: string) {
+    return this.brandQuery
+      .addSelect('DATE(orders.payment_date)', 'payment_date')
+      .where('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('orders.user_id != "mmzjapan"')
+      .groupBy('product.brand_id, DATE(orders.payment_date)')
       .orderBy('sales_price', 'DESC')
       .getRawMany();
   }
@@ -78,7 +98,9 @@ export class BrandService {
       .addSelect('product.name', 'product_name')
       .where('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
-        endDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
