@@ -31,6 +31,8 @@ export class KoreaController {
   ): Promise<object> {
     if (sumType === 'period' || sumType == undefined) {
       return await this.koreaService.getSalesByPeriod(startDay, endDay);
+    } else if (sumType === 'hour') {
+      return await this.koreaService.getSalesByHour(startDay, endDay);
     } else {
       return await this.koreaService.getSalesByDay(startDay, endDay);
     }
