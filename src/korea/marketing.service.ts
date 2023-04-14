@@ -145,4 +145,33 @@ export class MarketingService {
       .groupBy('marketing.created_at, marketing.channel')
       .getRawMany();
   }
+
+  getBrandChannelByPeriod(startDay: string, endDay: string) {
+    return this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .select('marketing.brand_id', 'brand_id')
+      .addSelect('marketing.channel', 'channel')
+      .addSelect('SUM(marketing.cost)', 'marketing_fee')
+      .where('marketing.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('marketing.brand_id, marketing.channel')
+      .getRawMany();
+  }
+
+  getBrandChannelByDay(startDay: string, endDay: string) {
+    return this.koreaMarketingRepository
+      .createQueryBuilder('marketing')
+      .select('marketing.created_at', 'created_at')
+      .addSelect('marketing.brand_id', 'brand_id')
+      .addSelect('marketing.channel', 'channel')
+      .addSelect('SUM(marketing.cost)', 'marketing_fee')
+      .where('marketing.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('marketing.created_at, marketing.brand_id, marketing.channel')
+      .getRawMany();
+  }
 }

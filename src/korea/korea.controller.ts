@@ -160,6 +160,22 @@ export class KoreaController {
     }
   }
 
+  @Get('/marketing/brand-channel')
+  async getMarketingFeeByBrandChannel(
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.marketingService.getBrandChannelByPeriod(
+        startDay,
+        endDay,
+      );
+    } else {
+      return await this.marketingService.getBrandChannelByDay(startDay, endDay);
+    }
+  }
+
   @Get('/brand')
   async getBrandSales(
     @Query('sumType') sumType: string,
