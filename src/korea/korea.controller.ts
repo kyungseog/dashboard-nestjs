@@ -208,14 +208,22 @@ export class KoreaController {
 
   @Get('/product')
   async getProductSalesTest(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    const productSales = await this.productService.getProductSales(
-      startDay,
-      endDay,
-    );
-    return { productSales };
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.productService.getProductSalesPeriod(startDay, endDay);
+    } else if (sumType === 'hour') {
+      return await this.productService.getProductSalesHour(startDay, endDay);
+    } else if (sumType === 'hourPeriod') {
+      return await this.productService.getProductSalesHourPeriod(
+        startDay,
+        endDay,
+      );
+    } else {
+      return await this.productService.getProductSalesDay(startDay, endDay);
+    }
   }
 
   @Get('/logistic')

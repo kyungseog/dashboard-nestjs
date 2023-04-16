@@ -5,12 +5,14 @@ import { Products } from 'src/entities/products.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Costs } from 'src/entities/costs.entity';
 import { DateTime } from 'luxon';
+import { Brands } from 'src/entities/brands.entity';
 
 @Injectable()
 export class ProductService {
   productQuery = this.koreaOrdersRepository
     .createQueryBuilder('orders')
     .leftJoin(Products, 'product', 'orders.product_id = product.id')
+    .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
     .leftJoin(
       Costs,
       'cost',
@@ -20,6 +22,7 @@ export class ProductService {
     .addSelect('product.name', 'product_name')
     .addSelect('product.image', 'image')
     .addSelect('product.brand_id', 'brand_id')
+    .addSelect('brand.name', 'brand_name')
     .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
     .addSelect('SUM(orders.quantity)', 'quantity')
     .addSelect(
@@ -49,13 +52,62 @@ export class ProductService {
     private dataSource: DataSource,
   ) {}
 
-  getProductSales(startDay: string, endDay: string) {
+  getProductSalesPeriod(startDay: string, endDay: string) {
     return this.productQuery
       .where('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
         endDay: DateTime.fromISO(endDay)
           .plus({ days: 1 })
           .toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('orders.user_id != "mmzjapan"')
+      .groupBy('product.id')
+      .orderBy('sales_price', 'DESC')
+      .getRawMany();
+  }
+
+  getProductSalesDay(startDay: string, endDay: string) {
+    return this.productQuery
+      .where('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
+      })
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('orders.user_id != "mmzjapan"')
+      .groupBy('product.id, DATE(orders.payment_date)')
+      .orderBy('sales_price', 'DESC')
+      .getRawMany();
+  }
+
+  getProductSalesHour(startDay: string, endDay: string) {
+    return this.productQuery
+      .addSelect('HOUR(orders.payment_date)', 'payment_hour')
+      .where('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('orders.user_id != "mmzjapan"')
+      .groupBy('product.id, HOUR(payment_date)')
+      .orderBy('sales_price', 'DESC')
+      .getRawMany();
+  }
+
+  getProductSalesHourPeriod(startDay: string, endDay: string) {
+    return this.productQuery
+      .addSelect('HOUR(orders.payment_date)', 'payment_hour')
+      .where('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
       })
       .andWhere('orders.status_id IN (:...ids)', {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],

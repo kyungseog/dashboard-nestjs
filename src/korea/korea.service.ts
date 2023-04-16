@@ -46,7 +46,8 @@ export class KoreaService {
   getSalesByHour(startDay: string, endDay: string) {
     return this.koreaOrdersRepository
       .createQueryBuilder()
-      .select('HOUR(payment_date)', 'payment_hour')
+      .select('DAY(payment_date)', 'payment_day')
+      .addSelect('HOUR(payment_date)', 'payment_hour')
       .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .addSelect('COUNT(DISTINCT(id))', 'order_count')
       .where('payment_date BETWEEN :startDay AND :endDay', {
@@ -57,7 +58,7 @@ export class KoreaService {
         ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
       .andWhere('user_id != "mmzjapan"')
-      .groupBy('HOUR(payment_date)')
+      .groupBy('DAY(payment_date), HOUR(payment_date)')
       .getRawMany();
   }
 

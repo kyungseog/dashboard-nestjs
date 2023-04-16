@@ -3,7 +3,7 @@ import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { LiveCommerces } from 'src/entities/live-commerces.entity';
 import { LiveCommercesService } from './live-commerces.service';
 
-@Controller('live-commerces')
+@Controller('live')
 export class LiveCommercesController {
   constructor(private liveCommercesService: LiveCommercesService) {}
 
