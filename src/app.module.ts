@@ -15,6 +15,7 @@ import { WeatherModule } from './weather/weather.module';
 import { PartnersModule } from './partners/partners.module';
 import { SquadsModule } from './squads/squads.module';
 import { BrandsModule } from './brands/brands.module';
+import { EssentialModule } from './mmz-essential/mmz-essential.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BrandsModule } from './brands/brands.module';
     PartnersModule,
     SquadsModule,
     BrandsModule,
+    EssentialModule,
   ],
   controllers: [AppController],
   providers: [AppService],
