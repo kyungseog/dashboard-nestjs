@@ -40,7 +40,7 @@ export class Suppliers extends BaseEntity {
   account_owner: string;
 
   @Column('varchar', { nullable: true })
-  email: string;
+  account_email: string;
 
   @Column({ type: 'enum', enum: SupplierStatus })
   status_id: SupplierStatus;

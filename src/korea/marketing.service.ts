@@ -71,6 +71,17 @@ export class MarketingService {
       .getRawMany();
   }
 
+  getDirectByBrandMonth(startDay: string, endDay: string) {
+    return this.directQuery
+      .addSelect('MONTH(marketing.created_at)', 'month')
+      .where('marketing.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('marketing.brand_id, MONTH(marketing.created_at)')
+      .getRawMany();
+  }
+
   getIndirectByDay(startDay: string, endDay: string) {
     return this.koreaAllocaitonFeesRepository
       .createQueryBuilder('marketing')
@@ -116,6 +127,18 @@ export class MarketingService {
         endDay,
       })
       .groupBy('marketing.brand_id')
+      .getRawMany();
+  }
+
+  getIndirectByBrandMonth(startDay: string, endDay: string) {
+    return this.indirectQuery
+      .addSelect('MONTH(marketing.created_at)', 'month')
+      .where('marketing.account = "marketing"')
+      .andWhere('marketing.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('marketing.brand_id, MONTH(marketing.created_at)')
       .getRawMany();
   }
 

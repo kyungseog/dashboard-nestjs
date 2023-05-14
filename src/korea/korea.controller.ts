@@ -1,9 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
-import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { KoreaService } from './korea.service';
 import { KoreaBrandService } from './korea-brand.service';
-import { KoreaMarketingService } from './korea-marketing.service';
 import { MarketingService } from './marketing.service';
 import { BrandService } from './brand.service';
 import { ProductService } from './product.service';
@@ -15,7 +13,6 @@ export class KoreaController {
   constructor(
     private koreaService: KoreaService,
     private koreaBrandService: KoreaBrandService,
-    private koreaMarketingService: KoreaMarketingService,
     private marketingService: MarketingService,
     private brandService: BrandService,
     private productService: ProductService,
@@ -144,6 +141,19 @@ export class KoreaController {
         direct,
         indirect,
       };
+    } else if (sumType === 'month') {
+      const direct = await this.marketingService.getDirectByBrandMonth(
+        startDay,
+        endDay,
+      );
+      const indirect = await this.marketingService.getIndirectByBrandMonth(
+        startDay,
+        endDay,
+      );
+      return {
+        direct,
+        indirect,
+      };
     } else {
       const direct = await this.marketingService.getDirectByBrandDay(
         startDay,
@@ -206,6 +216,34 @@ export class KoreaController {
     return await this.getMarketingByBrand(sumType, startDay, endDay);
   }
 
+  @Get('/brand/:brandId')
+  async getBrandSalesByIds(
+    @Param('brandId') brandId: string,
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return await this.brandService.getSalesByBrandPeriod(
+        startDay,
+        endDay,
+        brandId,
+      );
+    } else if (sumType === 'month') {
+      return await this.brandService.getSalesByBrandMonth(
+        startDay,
+        endDay,
+        brandId,
+      );
+    } else {
+      return await this.brandService.getSalesByBrandDay(
+        startDay,
+        endDay,
+        brandId,
+      );
+    }
+  }
+
   @Get('/product')
   async getProductSalesTest(
     @Query('sumType') sumType: string,
@@ -247,6 +285,8 @@ export class KoreaController {
   ): Promise<object> {
     if (sumType === 'period' || sumType == undefined) {
       return await this.logisticService.getFeeByBrandPeriod(startDay, endDay);
+    } else if (sumType === 'month') {
+      return await this.logisticService.getFeeByBrandMonth(startDay, endDay);
     } else {
       return await this.logisticService.getFeeByBrandDay(startDay, endDay);
     }

@@ -12,8 +12,7 @@ export class LogisticService {
 
   logisticQuery = this.koreaAllocaitonFeesRepository
     .createQueryBuilder('logistic')
-    .select('logistic.created_at', 'created_at')
-    .addSelect('logistic.brand_id', 'brand_id')
+    .select('logistic.brand_id', 'brand_id')
     .addSelect('SUM(logistic.allocated_fee)', 'logistic_fee')
     .where('logistic.account = "logistic"');
 
@@ -44,11 +43,7 @@ export class LogisticService {
   }
 
   getFeeByBrandPeriod(startDay: string, endDay: string) {
-    return this.koreaAllocaitonFeesRepository
-      .createQueryBuilder('logistic')
-      .select('logistic.brand_id', 'brand_id')
-      .addSelect('SUM(logistic.allocated_fee)', 'logistic_fee')
-      .where('logistic.account = "logistic"')
+    return this.logisticQuery
       .andWhere('logistic.created_at BETWEEN :startDay AND :endDay', {
         startDay,
         endDay,
@@ -58,17 +53,24 @@ export class LogisticService {
   }
 
   getFeeByBrandDay(startDay: string, endDay: string) {
-    return this.koreaAllocaitonFeesRepository
-      .createQueryBuilder('logistic')
-      .select('logistic.brand_id', 'brand_id')
+    return this.logisticQuery
       .addSelect('logistic.created_at', 'created_at')
-      .addSelect('SUM(logistic.allocated_fee)', 'logistic_fee')
-      .where('logistic.account = "logistic"')
       .andWhere('logistic.created_at BETWEEN :startDay AND :endDay', {
         startDay,
         endDay,
       })
       .groupBy('logistic.brand_id, logistic.created_at')
+      .getRawMany();
+  }
+
+  getFeeByBrandMonth(startDay: string, endDay: string) {
+    return this.logisticQuery
+      .addSelect('MONTH(logistic.created_at)', 'month')
+      .andWhere('logistic.created_at BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('logistic.brand_id, MONTH(logistic.created_at)')
       .getRawMany();
   }
 }
