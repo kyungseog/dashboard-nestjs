@@ -73,7 +73,7 @@ export class UserService {
       .leftJoin(Products, 'product', 'orders.product_id = product.id')
       .leftJoin(Brands, 'brand', 'product.brand_id = brand.id')
       .select('product.brand_id', 'brand_id')
-      .addSelect('brand.name', 'brand_name')
+      .addSelect('brand.brand_name', 'brand_name')
       .addSelect('orders.is_first', 'is_first')
       .addSelect('COUNT(DISTINCT(orders.user_id))', 'user_count')
       .addSelect('SUM(orders.quantity)', 'quantity')

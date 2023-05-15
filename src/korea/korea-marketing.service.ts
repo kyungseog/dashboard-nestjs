@@ -45,7 +45,7 @@ export class KoreaMarketingService {
       .createQueryBuilder('marketing')
       .leftJoin(Brands, 'brand', 'marketing.brand_id = brand.id')
       .select('brand.id', 'brand_id')
-      .addSelect('brand.name', 'brand_name')
+      .addSelect('brand.brand_name', 'brand_name')
       .addSelect('SUM(marketing.cost)', 'cost')
       .addSelect('SUM(marketing.conversion)', 'conversion')
       .where('YEAR(marketing.created_at) = :year', {

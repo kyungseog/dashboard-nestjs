@@ -7,10 +7,10 @@ export class Brands extends BaseEntity {
   id: string;
 
   @Column('varchar')
-  name: string;
+  brand_name: string;
 
   @Column({ type: 'enum', enum: BrandType })
-  type: BrandType;
+  account_type: BrandType;
 
   @Column('char', { nullable: true, length: 100 })
   design_type: string;

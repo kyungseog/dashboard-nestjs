@@ -113,8 +113,8 @@ export class KoreaService {
         .select('product.name', 'product_name')
         .addSelect('product.image', 'image')
         .addSelect('brand.id', 'brand_id')
-        .addSelect('brand.name', 'brand_name')
-        .addSelect('brand.type', 'brand_type')
+        .addSelect('brand.brand_name', 'brand_name')
+        .addSelect('brand.account_type', 'brand_type')
         .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
         .addSelect('SUM(orders.quantity)', 'quantity')
         .addSelect(
@@ -163,8 +163,8 @@ export class KoreaService {
         .select('product.name', 'product_name')
         .addSelect('product.image', 'image')
         .addSelect('brand.id', 'brand_id')
-        .addSelect('brand.name', 'brand_name')
-        .addSelect('brand.type', 'brand_type')
+        .addSelect('brand.brand_name', 'brand_name')
+        .addSelect('brand.account_type', 'brand_type')
         .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
         .addSelect('SUM(orders.quantity)', 'quantity')
         .addSelect(

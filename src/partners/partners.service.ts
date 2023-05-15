@@ -26,7 +26,7 @@ export class PartnersService {
     const brandList = await this.brandsRepository
       .createQueryBuilder('brand')
       .leftJoin(Suppliers, 'partner', 'brand.supplier_id = partner.id')
-      .select('brand.name', 'brand_name')
+      .select('brand.brand_name', 'brand_name')
       .addSelect('brand.created_at', 'created_at')
       .where('partner.integration_id = :partnerId', { partnerId: partnerId })
       .orderBy('brand.created_at')
@@ -194,7 +194,7 @@ export class PartnersService {
         )
         .select('product.name', 'product_name')
         .addSelect('product.image', 'image')
-        .addSelect('brand.name', 'brand_name')
+        .addSelect('brand.brand_name', 'brand_name')
         .addSelect('SUM(orders.quantity)', 'quantity')
         .addSelect(
           'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
@@ -228,7 +228,7 @@ export class PartnersService {
         .leftJoin(Suppliers, 'partner', 'brand.supplier_id = partner.id')
         .select('product.name', 'product_name')
         .addSelect('product.image', 'image')
-        .addSelect('brand.name', 'brand_name')
+        .addSelect('brand.brand_name', 'brand_name')
         .addSelect('SUM(orders.quantity)', 'quantity')
         .addSelect(
           'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',

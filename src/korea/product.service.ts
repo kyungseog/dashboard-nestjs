@@ -22,7 +22,7 @@ export class ProductService {
     .addSelect('product.name', 'product_name')
     .addSelect('product.image', 'image')
     .addSelect('product.brand_id', 'brand_id')
-    .addSelect('brand.name', 'brand_name')
+    .addSelect('brand.brand_name', 'brand_name')
     .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
     .addSelect('SUM(orders.quantity)', 'quantity')
     .addSelect(

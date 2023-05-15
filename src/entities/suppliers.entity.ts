@@ -13,7 +13,7 @@ export class Suppliers extends BaseEntity {
   integration_name: string;
 
   @Column('varchar')
-  name: string;
+  supplier_name: string;
 
   @Column('varchar', { nullable: true })
   ceo: string;

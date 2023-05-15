@@ -49,8 +49,8 @@ export class KoreaBrandService {
         'orders.product_variant_id = cost.product_variant_id',
       )
       .select('product.brand_id', 'brand_id')
-      .addSelect('brand.name', 'brand_name')
-      .addSelect('brand.type', 'brand_type')
+      .addSelect('brand.brand_name', 'brand_name')
+      .addSelect('brand.account_type', 'brand_type')
       .addSelect('brand.squad', 'brand_squad')
       .addSelect('brand.manager_id', 'md_id')
       .addSelect('supplier.id', 'supplier_id')
@@ -164,8 +164,8 @@ export class KoreaBrandService {
         'orders.product_variant_id = cost.product_variant_id',
       )
       .select('product.brand_id', 'brand_id')
-      .addSelect('brand.name', 'brand_name')
-      .addSelect('brand.type', 'brand_type')
+      .addSelect('brand.brand_name', 'brand_name')
+      .addSelect('brand.account_type', 'brand_type')
       .addSelect('supplier.id', 'supplier_id')
       .addSelect('supplier.integration_name', 'supplier_name')
       .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
