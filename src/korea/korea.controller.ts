@@ -216,6 +216,15 @@ export class KoreaController {
     return await this.getMarketingByBrand(sumType, startDay, endDay);
   }
 
+  @Get('/brand/month')
+  async getMonthlyBrand(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+    @Query('brandId') brandId: string,
+  ): Promise<object> {
+    return await this.brandService.getMonthlyBrand(startDay, endDay, brandId);
+  }
+
   @Get('/brand/:brandId')
   async getBrandSalesByIds(
     @Param('brandId') brandId: string,

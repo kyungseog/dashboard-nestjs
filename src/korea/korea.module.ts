@@ -22,6 +22,7 @@ import { BrandService } from './brand.service';
 import { ProductService } from './product.service';
 import { LogisticService } from './logistic.service';
 import { UserService } from './user.service';
+import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UserService } from './user.service';
       KoreaIfdo,
       KoreaAllocationFees,
       LiveCommerces,
+      MonthKoreaBrands,
     ]),
   ],
   controllers: [KoreaController],

@@ -3,6 +3,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { Products } from 'src/entities/products.entity';
 import { Brands } from 'src/entities/brands.entity';
+import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
 import { DataSource, Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { Suppliers } from 'src/entities/suppliers.entity';
@@ -13,6 +14,8 @@ export class BrandService {
   constructor(
     @InjectRepository(KoreaOrders)
     private koreaOrdersRepository: Repository<KoreaOrders>,
+    @InjectRepository(MonthKoreaBrands)
+    private monthKoreaBrandsRepository: Repository<MonthKoreaBrands>,
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
@@ -183,6 +186,17 @@ export class BrandService {
       })
       .groupBy('product.brand_id, product.id')
       .orderBy('sales_price', 'DESC')
+      .getRawMany();
+  }
+
+  getMonthlyBrand(startDay: string, endDay: string, brandId: string) {
+    return this.monthKoreaBrandsRepository
+      .createQueryBuilder('brand')
+      .where('brand.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('brand.brand_id = :brandId', { brandId })
       .getRawMany();
   }
 }

@@ -1,12 +1,15 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class MonthKoreaBrand extends BaseEntity {
+export class MonthKoreaBrands extends BaseEntity {
   @PrimaryColumn('int')
-  year: number;
+  payment_year: number;
 
   @PrimaryColumn('int')
-  month: number;
+  payment_month: number;
+
+  @PrimaryColumn('date')
+  payment_date: Date;
 
   @PrimaryColumn('char', { length: 50 })
   brand_id: string;
@@ -22,12 +25,6 @@ export class MonthKoreaBrand extends BaseEntity {
 
   @Column('varchar', { length: 255 })
   supplier_name: string;
-
-  @Column('char', { length: 50 })
-  md_id: string;
-
-  @Column('char', { length: 50 })
-  md_name: string;
 
   @Column('int')
   order_count: number;
