@@ -6,7 +6,7 @@ export class SettingsController {
   constructor(private settingsService: SettingsService) {}
 
   @Get('/marketing')
-  setMarketing() {
-    return this.settingsService.setMarketing();
+  async setMarketing(): Promise<object> {
+    return await this.settingsService.setMarketing();
   }
 }
