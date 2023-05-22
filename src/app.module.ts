@@ -16,6 +16,7 @@ import { PartnersModule } from './partners/partners.module';
 import { SquadsModule } from './squads/squads.module';
 import { BrandsModule } from './brands/brands.module';
 import { EssentialModule } from './mmz-essential/mmz-essential.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { EssentialModule } from './mmz-essential/mmz-essential.module';
     SquadsModule,
     BrandsModule,
     EssentialModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
