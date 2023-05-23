@@ -4,11 +4,11 @@ import { SquadsService } from './squads.service';
 
 @Controller('squads')
 export class SquadsController {
-  constructor(private koreaService: SquadsService) {}
+  constructor(private squadsService: SquadsService) {}
 
   @Get('/sales')
   getSales(): Promise<KoreaOrders[][]> {
-    return this.koreaService.getSales();
+    return this.squadsService.getSales();
   }
 
   @Get('/:id/sales')
@@ -24,12 +24,23 @@ export class SquadsController {
     liveMarketing: any;
     logistic: any;
   }> {
-    return this.koreaService.getSalesById(id, startDay, endDay);
+    return this.squadsService.getSalesById(id, startDay, endDay);
   }
 
   @Get('/:id/brands')
-  getBrandsById(@Param('id') id: string): Promise<{ target: any }> {
-    return this.koreaService.getBrandsById(id);
+  getBrandsById(
+    @Param('id') id: string,
+    @Query('sumType') sumType: string,
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    if (sumType === 'period' || sumType == undefined) {
+      return this.squadsService.getBrandsByPeriod(id, startDay, endDay);
+    } else if (sumType === 'week') {
+      return this.squadsService.getBrandsByWeek(id, startDay, endDay);
+    } else {
+      return this.squadsService.getBrandsByDay(id, startDay, endDay);
+    }
   }
 
   @Get('/:id/:brandId/products')
@@ -37,6 +48,6 @@ export class SquadsController {
     @Param('id') id: string,
     @Param('brandId') brandId: string,
   ): Promise<{ target: any }> {
-    return this.koreaService.getProductsById(id, brandId);
+    return this.squadsService.getProductsById(id, brandId);
   }
 }

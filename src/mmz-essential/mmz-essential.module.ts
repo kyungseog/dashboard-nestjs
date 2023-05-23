@@ -12,7 +12,7 @@ import { KoreaBudget } from 'src/entities/korea-budget.entity';
 import { Squads } from 'src/entities/squads.entity';
 import { KoreaIfdo } from 'src/entities/korea-ifdo.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
 import { EssentialController } from './mmz-essential.controller';
 import { EssentialService } from './mmz-essential.service';
 
@@ -31,7 +31,7 @@ import { EssentialService } from './mmz-essential.service';
       Squads,
       KoreaIfdo,
       KoreaAllocationFees,
-      LiveCommerces,
+      KoreaLives,
     ]),
   ],
   controllers: [EssentialController],

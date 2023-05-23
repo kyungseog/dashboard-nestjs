@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { Brands } from 'src/entities/brands.entity';
 import { Products } from 'src/entities/products.entity';
@@ -10,13 +10,13 @@ import { Products } from 'src/entities/products.entity';
 @Injectable()
 export class LiveCommercesService {
   constructor(
-    @InjectRepository(LiveCommerces)
-    private liveCommerceRepository: Repository<LiveCommerces>,
+    @InjectRepository(KoreaLives)
+    private liveCommerceRepository: Repository<KoreaLives>,
     @InjectRepository(KoreaOrders)
     private koreaOrdersRepository: Repository<KoreaOrders>,
   ) {}
 
-  async getLiveCommerce(start_date: Date): Promise<LiveCommerces> {
+  async getLiveCommerce(start_date: Date): Promise<KoreaLives> {
     const found = await this.liveCommerceRepository
       .createQueryBuilder('live')
       .leftJoinAndSelect(Brands, 'brand', 'live.brand_id = brand.id')

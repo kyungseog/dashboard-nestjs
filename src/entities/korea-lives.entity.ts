@@ -1,7 +1,7 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class LiveCommerces extends BaseEntity {
+export class KoreaLives extends BaseEntity {
   @PrimaryColumn('int')
   id: number;
 

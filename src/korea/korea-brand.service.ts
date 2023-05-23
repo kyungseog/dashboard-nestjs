@@ -9,7 +9,7 @@ import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { Suppliers } from 'src/entities/suppliers.entity';
 import { Costs } from 'src/entities/costs.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
 
 @Injectable()
 export class KoreaBrandService {
@@ -20,8 +20,8 @@ export class KoreaBrandService {
     private koreaMarketingRepository: Repository<KoreaMarketing>,
     @InjectRepository(KoreaAllocationFees)
     private koreaAllocaitonFeesRepository: Repository<KoreaAllocationFees>,
-    @InjectRepository(LiveCommerces)
-    private liveCommercesRepository: Repository<LiveCommerces>,
+    @InjectRepository(KoreaLives)
+    private liveCommercesRepository: Repository<KoreaLives>,
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}

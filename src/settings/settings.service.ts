@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
 import { JapanLives } from 'src/entities/japan-lives.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,8 +14,8 @@ export class SettingsService {
   constructor(
     @InjectRepository(KoreaMarketing)
     private koreaMarketingRepository: Repository<KoreaMarketing>,
-    @InjectRepository(LiveCommerces)
-    private liveCommercesRepository: Repository<LiveCommerces>,
+    @InjectRepository(KoreaLives)
+    private liveCommercesRepository: Repository<KoreaLives>,
     @InjectRepository(KoreaAllocationFees)
     private koreaAllocationFeesRepository: Repository<KoreaAllocationFees>,
     @InjectRepository(JapanLives)

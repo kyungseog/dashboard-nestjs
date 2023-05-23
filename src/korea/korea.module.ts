@@ -15,7 +15,7 @@ import { Squads } from 'src/entities/squads.entity';
 import { KoreaIfdo } from 'src/entities/korea-ifdo.entity';
 import { KoreaBrandService } from './korea-brand.service';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
 import { KoreaMarketingService } from './korea-marketing.service';
 import { MarketingService } from './marketing.service';
 import { BrandService } from './brand.service';
@@ -39,7 +39,7 @@ import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
       Squads,
       KoreaIfdo,
       KoreaAllocationFees,
-      LiveCommerces,
+      KoreaLives,
       MonthKoreaBrands,
     ]),
   ],

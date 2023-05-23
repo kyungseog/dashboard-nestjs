@@ -4,7 +4,9 @@ import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
 import { KoreaBudget } from 'src/entities/korea-budget.entity';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
+import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
+import { DayKoreaBrands } from 'src/entities/day-korea-brands.entity';
 import { Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { Products } from 'src/entities/products.entity';
@@ -23,9 +25,33 @@ export class SquadsService {
     private koreaMarketingRepository: Repository<KoreaMarketing>,
     @InjectRepository(KoreaAllocationFees)
     private koreaAllocaitonFeesRepository: Repository<KoreaAllocationFees>,
-    @InjectRepository(LiveCommerces)
-    private liveCommercesRepository: Repository<LiveCommerces>,
+    @InjectRepository(KoreaLives)
+    private liveCommercesRepository: Repository<KoreaLives>,
+    @InjectRepository(DayKoreaBrands)
+    private dayKoreaBrandsRepository: Repository<DayKoreaBrands>,
+    @InjectRepository(MonthKoreaBrands)
+    private monthKoreaBrandsRepository: Repository<MonthKoreaBrands>,
   ) {}
+
+  dayKoreaBrandQuery = this.dayKoreaBrandsRepository
+    .createQueryBuilder('data')
+    .leftJoin(Brands, 'brand', 'data.brand_id = brand.id')
+    .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
+    .select('data.brand_id', 'brand_id')
+    .addSelect('data.brand_name', 'brand_name')
+    .addSelect('SUM(data.order_count)', 'order_count')
+    .addSelect('SUM(data.quantity)', 'quantity')
+    .addSelect('SUM(data.sales)', 'sales')
+    .addSelect('SUM(data.commission)', 'commission')
+    .addSelect('SUM(data.cost)', 'cost')
+    .addSelect('SUM(data.order_coupon)', 'order_coupon')
+    .addSelect('SUM(data.product_coupon)', 'product_coupon')
+    .addSelect('SUM(data.mileage)', 'mileage')
+    .addSelect('SUM(data.pg_fee)', 'pg_fee')
+    .addSelect('SUM(data.direct_marketing_fee)', 'direct_marketing_fee')
+    .addSelect('SUM(data.indirect_marketing_fee)', 'indirect_marketing_fee')
+    .addSelect('SUM(data.logistic_fee)', 'logistic_fee')
+    .addSelect('SUM(data.contribution_margin)', 'contribution_margin');
 
   async getSales(): Promise<KoreaOrders[][]> {
     const targetDay = DateTime.now().toFormat('yyyy-LL-dd');
@@ -274,9 +300,43 @@ export class SquadsService {
     };
   }
 
-  async getBrandsById(id: string): Promise<{ target: any }> {
-    const target = 0;
-    return { target };
+  getBrandsByPeriod(id: string, startDay: string, endDay: string) {
+    return this.dayKoreaBrandQuery
+      .where('data.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('squad.id = :id', { id })
+      .groupBy('brand_id')
+      .getRawMany();
+  }
+
+  getBrandsByWeek(id: string, startDay: string, endDay: string) {
+    return this.dayKoreaBrandQuery
+      .addSelect('DATE_FORMAT(data.payment_date,"%Y-%v")', 'year_week')
+      .addSelect(
+        'CONCAT(DATE_FORMAT(DATE_ADD(data.payment_date, INTERVAL(2-DAYOFWEEK(data.payment_date)) DAY),"%Y/%m/%d")," - ",DATE_FORMAT(DATE_ADD(data.payment_date, INTERVAL(8-DAYOFWEEK(data.payment_date)) DAY),"%Y/%m/%d"))',
+        'date_range',
+      )
+      .where('data.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('squad.id = :id', { id })
+      .groupBy('year_week, brand_id')
+      .getRawMany();
+  }
+
+  getBrandsByDay(id: string, startDay: string, endDay: string) {
+    return this.dayKoreaBrandQuery
+      .addSelect('data.payment_date', 'payment_date')
+      .where('data.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('squad.id = :id', { id })
+      .groupBy('payment_date, brand_id')
+      .getRawMany();
   }
 
   async getProductsById(id: string, brandId: string): Promise<{ target: any }> {

@@ -6,7 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { LiveCommerces } from 'src/entities/live-commerces.entity';
+import { KoreaLives } from 'src/entities/korea-lives.entity';
 
 @Injectable()
 export class KoreaMarketingService {
@@ -17,8 +17,8 @@ export class KoreaMarketingService {
     private koreaMarketingRepository: Repository<KoreaMarketing>,
     @InjectRepository(KoreaAllocationFees)
     private koreaAllocaitonFeesRepository: Repository<KoreaAllocationFees>,
-    @InjectRepository(LiveCommerces)
-    private liveCommercesRepository: Repository<LiveCommerces>,
+    @InjectRepository(KoreaLives)
+    private liveCommercesRepository: Repository<KoreaLives>,
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
