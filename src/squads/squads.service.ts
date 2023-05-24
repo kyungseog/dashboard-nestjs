@@ -82,6 +82,8 @@ export class SquadsService {
     .leftJoin(Squads, 'squad', 'brand.squad = squad.name')
     .select('data.brand_id', 'brand_id')
     .addSelect('data.brand_name', 'brand_name')
+    .addSelect('brand.manager_id', 'md_id')
+    .addSelect('squad.id', 'squad_id')
     .addSelect('SUM(data.order_count)', 'order_count')
     .addSelect('SUM(data.quantity)', 'quantity')
     .addSelect('SUM(data.sales)', 'sales')
