@@ -10,6 +10,7 @@ import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
 import { JapanLives } from 'src/entities/japan-lives.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JapanMarketing } from 'src/entities/japan-marketing.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       KoreaMarketing,
       KoreaAllocationFees,
       JapanLives,
+      JapanMarketing,
     ]),
   ],
   controllers: [SettingsController],

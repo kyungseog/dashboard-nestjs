@@ -9,4 +9,9 @@ export class SettingsController {
   async setMarketing(): Promise<object> {
     return await this.settingsService.setMarketing();
   }
+
+  @Get('/allocateExpense')
+  async setAllocateExpense(): Promise<object> {
+    return await this.settingsService.setAllocateExpense();
+  }
 }

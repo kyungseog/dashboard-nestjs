@@ -1,7 +1,7 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class KoreaMarketing extends BaseEntity {
+export class JapanMarketing extends BaseEntity {
   @PrimaryColumn('varchar')
   id: string;
 
