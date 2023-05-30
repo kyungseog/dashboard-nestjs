@@ -2,15 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
 import { KoreaLives } from 'src/entities/korea-lives.entity';
-import { KoreaOrders } from 'src/entities/korea-orders.entity';
-import { Products } from 'src/entities/products.entity';
 import { Brands } from 'src/entities/brands.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { google } from 'googleapis';
 import { DateTime } from 'luxon';
-import { JapanLives } from 'src/entities/japan-lives.entity';
-import { JapanMarketing } from 'src/entities/japan-marketing.entity';
+import { Costs } from 'src/entities/costs.entity';
+import { ExchangeRate } from 'src/entities/exchange-rate.entity';
+import { Suppliers } from 'src/entities/suppliers.entity';
+import { KoreaUsers } from 'src/entities/korea-users.entity';
+import { Stocks } from 'src/entities/stocks.entity';
 
 @Injectable()
 export class SettingsService {
@@ -19,14 +20,20 @@ export class SettingsService {
     private koreaMarketingRepository: Repository<KoreaMarketing>,
     @InjectRepository(KoreaLives)
     private koreaLivesRepository: Repository<KoreaLives>,
-    @InjectRepository(KoreaOrders)
-    private koreaOrdersRepository: Repository<KoreaOrders>,
+    @InjectRepository(Costs)
+    private costsRepository: Repository<Costs>,
+    @InjectRepository(ExchangeRate)
+    private exchangeRateRepository: Repository<ExchangeRate>,
+    @InjectRepository(Suppliers)
+    private suppliersRepository: Repository<Suppliers>,
+    @InjectRepository(Brands)
+    private brandsRepository: Repository<Brands>,
+    @InjectRepository(KoreaUsers)
+    private koreaUsersRepository: Repository<KoreaUsers>,
+    @InjectRepository(Stocks)
+    private stocksRepository: Repository<Stocks>,
     @InjectRepository(KoreaAllocationFees)
     private koreaAllocationFeesRepository: Repository<KoreaAllocationFees>,
-    @InjectRepository(JapanLives)
-    private japanLivesRepository: Repository<JapanLives>,
-    @InjectRepository(JapanMarketing)
-    private japanMarketingRepository: Repository<JapanMarketing>,
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
@@ -319,11 +326,405 @@ export class SettingsService {
   async updateCost(client) {
     const gsapi = google.sheets({ version: 'v4', auth: client });
     const options = {
-      spreadsheetId: process.env.MARKETING_SHEET_ID,
-      range: 'db_upload!A2:J1000000',
+      spreadsheetId: process.env.COST_SHEET_ID,
+      range: 'db_upload!A2:D1000000',
     };
 
     const datas = await gsapi.spreadsheets.values.get(options);
     const dataArray = datas.data.values;
+    const costDataArray = dataArray.map((r) => ({
+      product_id: r[0],
+      product_variant_id: r[1],
+      custom_variant_id: r[2],
+      cost: Number(r[3]),
+    }));
+    return await this.costsRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Costs, [
+        'product_id',
+        'product_variant_id',
+        'custom_variant_id',
+        'cost',
+      ])
+      .values(costDataArray)
+      .orUpdate(
+        ['product_id', 'custom_variant_id', 'cost'],
+        ['product_variant_id'],
+      )
+      .execute();
+  }
+
+  async exchageRateInfo(client) {
+    const gsapi = google.sheets({ version: 'v4', auth: client });
+    const options = {
+      spreadsheetId: process.env.KOREA_SHEET_ID,
+      range: 'rate!A2:C100000',
+    };
+
+    const datas = await gsapi.spreadsheets.values.get(options);
+    const dataArray = datas.data.values;
+    const exchangeRateDataArray = dataArray.map((r) => ({
+      created_at: r[0],
+      usd: r[1],
+      jpy: r[2],
+    }));
+    return await this.exchangeRateRepository
+      .createQueryBuilder()
+      .insert()
+      .into(ExchangeRate, ['created_at', 'usd', 'jpy'])
+      .values(exchangeRateDataArray)
+      .orUpdate(['usd', 'jpy'], ['created_at'])
+      .execute();
+  }
+
+  async supplierInfo(client) {
+    const gsapi = google.sheets({ version: 'v4', auth: client });
+    const options = {
+      spreadsheetId: process.env.KOREA_SHEET_ID,
+      range: 'supplier!A2:N100000',
+    };
+
+    const datas = await gsapi.spreadsheets.values.get(options);
+    const dataArray = datas.data.values;
+    const supplierDataArray = dataArray.map((r) => ({
+      id: r[0],
+      integration_id: r[1],
+      integration_name: r[2],
+      supplier_name: r[3],
+      ceo: r[4],
+      registration_id: r[5],
+      account_type: r[6],
+      tax_type: r[7],
+      account_count: r[8],
+      bank_name: r[9],
+      bank_account: r[10],
+      account_owner: r[11],
+      account_email: r[12],
+      status_id: r[13],
+    }));
+    return await this.suppliersRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Suppliers, [
+        'id',
+        'integration_id',
+        'integration_name',
+        'supplier_name',
+        'ceo',
+        'registration_id',
+        'account_type',
+        'tax_type',
+        'account_count',
+        'bank_name',
+        'bank_account',
+        'account_owner',
+        'account_email',
+        'status_id',
+      ])
+      .values(supplierDataArray)
+      .orUpdate(
+        [
+          'integration_id',
+          'integration_name',
+          'supplier_name',
+          'ceo',
+          'registration_id',
+          'account_type',
+          'tax_type',
+          'account_count',
+          'bank_name',
+          'bank_account',
+          'account_owner',
+          'account_email',
+          'status_id',
+        ],
+        ['id'],
+      )
+      .execute();
+  }
+
+  async brandInfo(client) {
+    const gsapi = google.sheets({ version: 'v4', auth: client });
+    const options = {
+      spreadsheetId: process.env.KOREA_SHEET_ID,
+      range: 'brand!A2:M100000',
+    };
+
+    const datas = await gsapi.spreadsheets.values.get(options);
+    const dataArray = datas.data.values;
+    const brandDataArray = dataArray.map((r) => ({
+      id: r[0],
+      brand_name: r[1],
+      account_type: r[2],
+      design_type: r[3],
+      sales_country: r[4],
+      squad: r[5],
+      manager_id: r[6],
+      supplier_id: r[7],
+      supplier_md_email: r[8],
+      commission: r[9],
+      created_at: r[10],
+      deleted_at: r[11],
+      status_id: r[12],
+    }));
+    return await this.brandsRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Brands, [
+        'id',
+        'brand_name',
+        'account_type',
+        'design_type',
+        'sales_country',
+        'squad',
+        'manager_id',
+        'supplier_id',
+        'supplier_md_email',
+        'commission',
+        'created_at',
+        'deleted_at',
+        'status_id',
+      ])
+      .values(brandDataArray)
+      .orUpdate(
+        [
+          'brand_name',
+          'account_type',
+          'design_type',
+          'sales_country',
+          'squad',
+          'manager_id',
+          'supplier_id',
+          'supplier_md_email',
+          'commission',
+          'created_at',
+          'deleted_at',
+          'status_id',
+        ],
+        ['id'],
+      )
+      .execute();
+  }
+
+  async customerInfo(client) {
+    const gsapi = google.sheets({ version: 'v4', auth: client });
+    const options = {
+      spreadsheetId: process.env.KOREA_SHEET_ID,
+      range: 'customer!A2:G5000000',
+    };
+
+    const datas = await gsapi.spreadsheets.values.get(options);
+    const dataArray = datas.data.values;
+    const customerDataArray = dataArray.map((r) => ({
+      id: r[0],
+      created_at: r[1],
+      updated_at: r[2],
+      user_birthday: r[3],
+      first_child_birthday: r[4],
+      second_child_birthday: r[5],
+      cellphone: r[6],
+    }));
+    return await this.koreaUsersRepository
+      .createQueryBuilder()
+      .insert()
+      .into(KoreaUsers, [
+        'id',
+        'created_at',
+        'updated_at',
+        'user_birthday',
+        'first_child_birthday',
+        'second_child_birthday',
+        'cellphone',
+      ])
+      .values(customerDataArray)
+      .orUpdate(
+        [
+          'created_at',
+          'updated_at',
+          'user_birthday',
+          'first_child_birthday',
+          'second_child_birthday',
+          'cellphone',
+        ],
+        ['id'],
+      )
+      .execute();
+  }
+
+  async stockInfo(client) {
+    const gsapi = google.sheets({ version: 'v4', auth: client });
+    const options = {
+      spreadsheetId: process.env.KOREA_SHEET_ID,
+      range: 'stock!A2:L200000',
+    };
+
+    const datas = await gsapi.spreadsheets.values.get(options);
+    const dataArray = datas.data.values;
+    const stockDataArray = dataArray.map((r) => ({
+      seller_name: r[0],
+      seller_id: r[1],
+      custom_product_id: r[2],
+      barcode: r[3],
+      custom_variant_id: r[4],
+      product_name: r[5],
+      option_name: r[6],
+      quantity: r[7],
+      non_delivery_order: r[8],
+      usable_quantity: r[9],
+      cost: r[10],
+      total_cost: r[11],
+    }));
+    return await this.stocksRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Stocks, [
+        'seller_name',
+        'seller_id',
+        'custom_product_id',
+        'barcode',
+        'custom_variant_id',
+        'product_name',
+        'option_name',
+        'quantity',
+        'non_delivery_order',
+        'usable_quantity',
+        'cost',
+        'total_cost',
+      ])
+      .values(stockDataArray)
+      .orUpdate(
+        [
+          'seller_name',
+          'seller_id',
+          'custom_product_id',
+          'custom_variant_id',
+          'product_name',
+          'option_name',
+          'quantity',
+          'non_delivery_order',
+          'usable_quantity',
+          'cost',
+          'total_cost',
+        ],
+        ['barcode'],
+      )
+      .execute();
+  }
+
+  async koreaMonthInfo() {
+    const targetDate = [];
+    const years = DateTime.now().minus({ days: 1 }).toFormat('yyyy');
+    const days = DateTime.now().minus({ days: 1 }).toFormat('dd');
+    const months = DateTime.now().minus({ days: 1 }).toFormat('LL');
+    for (let i = 1; i <= Number(days); i++) {
+      const day = i < 10 ? '0' + i : i;
+      targetDate.push(years + '-' + months + '-' + day);
+    }
+
+    for (let i = 0; i < targetDate.length; i++) {
+      const salesData = await this.dataSource.query(
+        `SELECT b.brand_id
+          , SUM((a.sale_price - a.discount_price) * a.quantity) as sales_price
+          , SUM((a.sale_price - a.discount_price) * a.quantity) * 100 / SUM(SUM((a.sale_price - a.discount_price) * a.quantity)) OVER() as ratio
+          , ROUND(im.indirect_marketing * SUM((a.sale_price - a.discount_price) * a.quantity) / SUM(SUM((a.sale_price - a.discount_price) * a.quantity)) OVER()) as allocated_fee
+        FROM management.korea_orders a
+          left join management.products b on a.product_id = b.id
+          left join management.brands c on b.brand_id = c.id,
+            (select SUM(a.cost) as indirect_marketing
+            from management.korea_marketing a
+              left join management.brands b on a.brand_id = b.id
+            where a.created_at = ? AND b.supplier_id = '3') im
+        where a.payment_date BETWEEN ? AND ?
+          and a.status_id in ('p1', 'g1', 'd1', 'd2', 's1')
+          and a.user_id != 'mmzjapan'
+        group by b.brand_id`,
+        [
+          targetDate[i],
+          targetDate[i],
+          DateTime.fromISO(targetDate[i])
+            .plus({ days: 1 })
+            .toFormat('yyyy-LL-dd'),
+        ],
+      );
+
+      const marketingFee = salesData.map((r) => ({
+        created_at: DateTime.fromFormat(targetDate[i], 'yyyy-LL-dd').toISO(),
+        account: 'marketing',
+        brand_id: r.brand_id == null ? 'B0000000' : r.brand_id,
+        allocated_fee: Number(r.allocated_fee),
+      }));
+
+      return await this.koreaAllocationFeesRepository
+        .createQueryBuilder()
+        .insert()
+        .into(KoreaAllocationFees, [
+          'created_at',
+          'account',
+          'brand_id',
+          'allocated_fee',
+        ])
+        .values(marketingFee)
+        .orUpdate(['allocated_fee'], ['created_at', 'account', 'brand_id'])
+        .execute();
+    }
+  }
+
+  async koreaDayInfo() {
+    const targetDate = [];
+    const years = DateTime.now().minus({ days: 1 }).toFormat('yyyy');
+    const days = DateTime.now().minus({ days: 1 }).toFormat('dd');
+    const months = DateTime.now().minus({ days: 1 }).toFormat('LL');
+    for (let i = 1; i <= Number(days); i++) {
+      const day = i < 10 ? '0' + i : i;
+      targetDate.push(years + '-' + months + '-' + day);
+    }
+
+    for (let i = 0; i < targetDate.length; i++) {
+      const salesData = await this.dataSource.query(
+        `SELECT b.brand_id
+          , SUM((a.sale_price - a.discount_price) * a.quantity) as sales_price
+          , SUM((a.sale_price - a.discount_price) * a.quantity) * 100 / SUM(SUM((a.sale_price - a.discount_price) * a.quantity)) OVER() as ratio
+          , ROUND(im.indirect_marketing * SUM((a.sale_price - a.discount_price) * a.quantity) / SUM(SUM((a.sale_price - a.discount_price) * a.quantity)) OVER()) as allocated_fee
+        FROM management.korea_orders a
+          left join management.products b on a.product_id = b.id
+          left join management.brands c on b.brand_id = c.id,
+            (select SUM(a.cost) as indirect_marketing
+            from management.korea_marketing a
+              left join management.brands b on a.brand_id = b.id
+            where a.created_at = ? AND b.supplier_id = '3') im
+        where a.payment_date BETWEEN ? AND ?
+          and a.status_id in ('p1', 'g1', 'd1', 'd2', 's1')
+          and a.user_id != 'mmzjapan'
+        group by b.brand_id`,
+        [
+          targetDate[i],
+          targetDate[i],
+          DateTime.fromISO(targetDate[i])
+            .plus({ days: 1 })
+            .toFormat('yyyy-LL-dd'),
+        ],
+      );
+
+      const marketingFee = salesData.map((r) => ({
+        created_at: DateTime.fromFormat(targetDate[i], 'yyyy-LL-dd').toISO(),
+        account: 'marketing',
+        brand_id: r.brand_id == null ? 'B0000000' : r.brand_id,
+        allocated_fee: Number(r.allocated_fee),
+      }));
+
+      return await this.koreaAllocationFeesRepository
+        .createQueryBuilder()
+        .insert()
+        .into(KoreaAllocationFees, [
+          'created_at',
+          'account',
+          'brand_id',
+          'allocated_fee',
+        ])
+        .values(marketingFee)
+        .orUpdate(['allocated_fee'], ['created_at', 'account', 'brand_id'])
+        .execute();
+    }
   }
 }
