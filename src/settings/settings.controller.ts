@@ -97,6 +97,11 @@ export class SettingsController {
     return { exchageRate, supplier, brand, customer, stock };
   }
 
+  @Get('/addProductInfomation')
+  async setAddProductInfo(): Promise<object> {
+    return await this.settingsService.addProductInfo();
+  }
+
   @Get('/koreaMonthInfomation')
   async setKoreaMonthInfomation(): Promise<object> {
     return await this.settingsService.koreaMonthInfo();
@@ -105,5 +110,24 @@ export class SettingsController {
   @Get('/koreaDayInfomation')
   async setKoreaDayInfomation(): Promise<object> {
     return await this.settingsService.koreaDayInfo();
+  }
+
+  @Get('/marketingPart')
+  async setMarketingPart(): Promise<object> {
+    const client = new google.auth.JWT(
+      keys.client_email,
+      null,
+      keys.private_key,
+      ['https://www.googleapis.com/auth/spreadsheets'],
+    );
+
+    (client) => {
+      return new Promise((resolve, reject) => {
+        client.authorize((err, tokens) => {
+          return err ? reject(err) : resolve(tokens);
+        });
+      });
+    };
+    return await this.settingsService.marketingPart(client);
   }
 }

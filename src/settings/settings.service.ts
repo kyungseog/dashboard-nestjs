@@ -12,10 +12,15 @@ import { ExchangeRate } from 'src/entities/exchange-rate.entity';
 import { Suppliers } from 'src/entities/suppliers.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { Stocks } from 'src/entities/stocks.entity';
+import * as qs from 'querystring';
+import { Products } from 'src/entities/products.entity';
+import { ProductVariants } from 'src/entities/product-variants.entity';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class SettingsService {
   constructor(
+    private readonly httpService: HttpService,
     @InjectRepository(KoreaMarketing)
     private koreaMarketingRepository: Repository<KoreaMarketing>,
     @InjectRepository(KoreaLives)
@@ -34,6 +39,10 @@ export class SettingsService {
     private stocksRepository: Repository<Stocks>,
     @InjectRepository(KoreaAllocationFees)
     private koreaAllocationFeesRepository: Repository<KoreaAllocationFees>,
+    @InjectRepository(Products)
+    private productsRepository: Repository<Products>,
+    @InjectRepository(ProductVariants)
+    private productVariantsRepository: Repository<ProductVariants>,
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
@@ -65,7 +74,7 @@ export class SettingsService {
       .into(KoreaMarketing, [
         'id',
         'channel',
-        'created_date',
+        'created_at',
         'name',
         'cost',
         'click',
@@ -78,7 +87,7 @@ export class SettingsService {
       .orUpdate(
         [
           'channel',
-          'created_date',
+          'created_at',
           'name',
           'cost',
           'click',
@@ -327,7 +336,7 @@ export class SettingsService {
     const gsapi = google.sheets({ version: 'v4', auth: client });
     const options = {
       spreadsheetId: process.env.COST_SHEET_ID,
-      range: 'db_upload!A2:D1000000',
+      range: 'db_upload!A2:D200000',
     };
 
     const datas = await gsapi.spreadsheets.values.get(options);
@@ -727,4 +736,226 @@ export class SettingsService {
         .execute();
     }
   }
+
+  async addProductInfo() {
+    const productData = await this.dataSource.query(
+      `SELECT a.product_id
+      FROM management.korea_orders a 
+        LEFT JOIN management.products b ON a.product_id = b.id
+      WHERE b.id is NULL 
+        AND a.payment_date BETWEEN '2023-01-01' AND now()
+      GROUP BY a.product_id`,
+    );
+
+    const products = productData.map((r) => r.product_id);
+    for (const goodsNo of products) {
+      this.getProduct(goodsNo);
+    }
+  }
+
+  async marketingPart(client) {
+    const gsapi = google.sheets({ version: 'v4', auth: client });
+    const options = {
+      spreadsheetId: process.env.KOREA_SHEET_ID,
+      range: 'stock!A2:L200000',
+    };
+
+    const datas = await gsapi.spreadsheets.values.get(options);
+    const dataArray = datas.data.values;
+    const stockDataArray = dataArray.map((r) => ({
+      seller_name: r[0],
+      seller_id: r[1],
+      custom_product_id: r[2],
+      barcode: r[3],
+      custom_variant_id: r[4],
+      product_name: r[5],
+      option_name: r[6],
+      quantity: r[7],
+      non_delivery_order: r[8],
+      usable_quantity: r[9],
+      cost: r[10],
+      total_cost: r[11],
+    }));
+    return await this.stocksRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Stocks, [
+        'seller_name',
+        'seller_id',
+        'custom_product_id',
+        'barcode',
+        'custom_variant_id',
+        'product_name',
+        'option_name',
+        'quantity',
+        'non_delivery_order',
+        'usable_quantity',
+        'cost',
+        'total_cost',
+      ])
+      .values(stockDataArray)
+      .orUpdate(
+        [
+          'seller_name',
+          'seller_id',
+          'custom_product_id',
+          'custom_variant_id',
+          'product_name',
+          'option_name',
+          'quantity',
+          'non_delivery_order',
+          'usable_quantity',
+          'cost',
+          'total_cost',
+        ],
+        ['barcode'],
+      )
+      .execute();
+  }
+
+  async getProduct(goodsNo) {
+    const originData = {
+      KR: '한국',
+      JP: '일본',
+      US: '미국',
+      VE: '베트남',
+      CN: '중국',
+      ID: '인도네시아',
+      IN: '인도',
+      MY: '말레이시아',
+    };
+
+    const paramDetail =
+      `partner_key=${process.env.PARTNER_KEY}&key=${process.env.KEY}&` +
+      qs.stringify({
+        goodsNo: goodsNo,
+        page: 1,
+        size: 10,
+      });
+
+    const options = {
+      method: 'POST',
+      url: `https://openhub.godo.co.kr/godomall5/goods/Goods_Search.php?${paramDetail}`,
+    };
+
+    const xmlRowData = this.httpService.get(
+      `https://openhub.godo.co.kr/godomall5/goods/Goods_Search.php?${paramDetail}`,
+    );
+    const jsonData = await parseXml(xmlRowData);
+    const goodsData = jsonData.data.return[0].goods_data;
+    if (goodsData == undefined || goodsData == null) {
+      return 'No data';
+    }
+
+    for (let i = 0; i < goodsData.length; i++) {
+      const r = goodsData[i];
+      const productData = [
+        r.goodsNo[0],
+        r.goodsNm[0],
+        r.listImageData == undefined ? null : r.listImageData[0]._,
+        r.brandCd[0],
+        r.goodsCd[0],
+        r.modDt[0] == '' ? null : r.modDt[0],
+        r.trendNo[0] == '' ? null : r.trendNo[0],
+        r.originNm[0] == ''
+          ? null
+          : Object.keys(originData)[
+              Object.values(originData).indexOf(r.originNm[0])
+            ],
+        r.taxFreeFl[0],
+        Number(r.fixedPrice[0]) > 100000000 ? 0 : Number(r.fixedPrice[0]),
+        Number(r.goodsPrice[0]) > 100000000 ? 0 : Number(r.goodsPrice[0]),
+        r.cafe24ProductCode[0] == '' ? null : r.cafe24ProductCode[0],
+      ];
+
+      await this.productsRepository
+        .createQueryBuilder()
+        .insert()
+        .into(Products, [
+          'id',
+          'name',
+          'image',
+          'brand_id',
+          'custom_product_id',
+          'updated_at',
+          'seller_id',
+          'production_country',
+          'tax_type',
+          'fixed_price',
+          'product_price',
+          'cafe_product_code',
+        ])
+        .values(productData)
+        .orUpdate(
+          [
+            'name',
+            'image',
+            'brand_id',
+            'custom_product_id',
+            'updated_at',
+            'seller_id',
+            'production_country',
+            'tax_type',
+            'fixed_price',
+            'product_price',
+            'cafe_product_code',
+          ],
+          ['id'],
+        )
+        .execute();
+
+      if (r.optionData) {
+        for (let j = 0; j < r.optionData.length; j++) {
+          const s = r.optionData[j];
+
+          const optionData = [
+            s.sno[0],
+            s.optionCode[0],
+            s.optionValue1[0],
+            s.optionValue2[0],
+            s.optionValue3[0],
+            s.optionValue4[0],
+            r.goodsNo[0],
+            Number(s.optionPrice[0]),
+            s.modDt[0] == '' ? null : s.modDt[0],
+            s.cafe24OptionCode[0] == '' ? null : s.cafe24OptionCode[0],
+          ];
+
+          await this.productVariantsRepository
+            .createQueryBuilder()
+            .insert()
+            .into(ProductVariants, [
+              'id',
+              'custom_variant_id',
+              'variant_color',
+              'variant_size',
+              'variant_etc1',
+              'variant_etc2',
+              'product_id',
+              'option_price',
+              'updated_at',
+              'cafe_variant_code',
+            ])
+            .values(optionData)
+            .orUpdate(
+              [
+                'custom_variant_id',
+                'variant_color',
+                'variant_size',
+                'variant_etc1',
+                'variant_etc2',
+                'product_id',
+                'option_price',
+                'updated_at',
+                'cafe_variant_code',
+              ],
+              ['id'],
+            )
+            .execute();
+        }
+      }
+    }
+  }
+
+  async parseXml() {}
 }

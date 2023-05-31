@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
@@ -8,9 +9,11 @@ import { Products } from 'src/entities/products.entity';
 import { KoreaLives } from 'src/entities/korea-lives.entity';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { JapanLives } from 'src/entities/japan-lives.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { JapanMarketing } from 'src/entities/japan-marketing.entity';
+import { Costs } from 'src/entities/costs.entity';
+import { ExchangeRate } from 'src/entities/exchange-rate.entity';
+import { KoreaUsers } from 'src/entities/korea-users.entity';
+import { Stocks } from 'src/entities/stocks.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -22,8 +25,11 @@ import { JapanMarketing } from 'src/entities/japan-marketing.entity';
       Products,
       KoreaMarketing,
       KoreaAllocationFees,
-      JapanLives,
-      JapanMarketing,
+      Costs,
+      ExchangeRate,
+      KoreaUsers,
+      Stocks,
+      HttpModule,
     ]),
   ],
   controllers: [SettingsController],
