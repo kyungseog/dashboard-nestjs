@@ -14,6 +14,7 @@ import { ExchangeRate } from 'src/entities/exchange-rate.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { Stocks } from 'src/entities/stocks.entity';
 import { HttpModule } from '@nestjs/axios';
+import { ProductVariants } from 'src/entities/product-variants.entity';
 
 @Module({
   imports: [
@@ -29,8 +30,9 @@ import { HttpModule } from '@nestjs/axios';
       ExchangeRate,
       KoreaUsers,
       Stocks,
-      HttpModule,
+      ProductVariants,
     ]),
+    HttpModule,
   ],
   controllers: [SettingsController],
   providers: [SettingsService],

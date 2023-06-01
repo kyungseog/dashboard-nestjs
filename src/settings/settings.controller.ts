@@ -98,7 +98,7 @@ export class SettingsController {
   }
 
   @Get('/addProductInfomation')
-  async setAddProductInfo(): Promise<object> {
+  async setAddProductInfo() {
     return await this.settingsService.addProductInfo();
   }
 

@@ -16,6 +16,9 @@ import * as qs from 'querystring';
 import { Products } from 'src/entities/products.entity';
 import { ProductVariants } from 'src/entities/product-variants.entity';
 import { HttpService } from '@nestjs/axios';
+import { parseString } from 'xml2js';
+import { Observable, lastValueFrom, map } from 'rxjs';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class SettingsService {
@@ -749,7 +752,7 @@ export class SettingsService {
 
     const products = productData.map((r) => r.product_id);
     for (const goodsNo of products) {
-      this.getProduct(goodsNo);
+      return this.getProduct(goodsNo);
     }
   }
 
@@ -833,129 +836,135 @@ export class SettingsService {
         size: 10,
       });
 
-    const options = {
-      method: 'POST',
-      url: `https://openhub.godo.co.kr/godomall5/goods/Goods_Search.php?${paramDetail}`,
-    };
-
-    const xmlRowData = this.httpService.get(
-      `https://openhub.godo.co.kr/godomall5/goods/Goods_Search.php?${paramDetail}`,
-    );
-    const jsonData = await parseXml(xmlRowData);
+    const xmlRowData: Observable<AxiosResponse<any>> = this.httpService
+      .get(
+        `https://openhub.godo.co.kr/godomall5/goods/Goods_Search.php?${paramDetail}`,
+      )
+      .pipe(map((res) => res.data));
+    const xmlData = await lastValueFrom(xmlRowData);
+    const jsonData = await this.parseXml(xmlData);
+    console.log(jsonData);
     const goodsData = jsonData.data.return[0].goods_data;
-    if (goodsData == undefined || goodsData == null) {
-      return 'No data';
-    }
 
-    for (let i = 0; i < goodsData.length; i++) {
-      const r = goodsData[i];
-      const productData = [
-        r.goodsNo[0],
-        r.goodsNm[0],
-        r.listImageData == undefined ? null : r.listImageData[0]._,
-        r.brandCd[0],
-        r.goodsCd[0],
-        r.modDt[0] == '' ? null : r.modDt[0],
-        r.trendNo[0] == '' ? null : r.trendNo[0],
-        r.originNm[0] == ''
-          ? null
-          : Object.keys(originData)[
-              Object.values(originData).indexOf(r.originNm[0])
-            ],
-        r.taxFreeFl[0],
-        Number(r.fixedPrice[0]) > 100000000 ? 0 : Number(r.fixedPrice[0]),
-        Number(r.goodsPrice[0]) > 100000000 ? 0 : Number(r.goodsPrice[0]),
-        r.cafe24ProductCode[0] == '' ? null : r.cafe24ProductCode[0],
-      ];
+    // if (goodsData == undefined || goodsData == null) {
+    //   return 'No data';
+    // }
 
-      await this.productsRepository
-        .createQueryBuilder()
-        .insert()
-        .into(Products, [
-          'id',
-          'name',
-          'image',
-          'brand_id',
-          'custom_product_id',
-          'updated_at',
-          'seller_id',
-          'production_country',
-          'tax_type',
-          'fixed_price',
-          'product_price',
-          'cafe_product_code',
-        ])
-        .values(productData)
-        .orUpdate(
-          [
-            'name',
-            'image',
-            'brand_id',
-            'custom_product_id',
-            'updated_at',
-            'seller_id',
-            'production_country',
-            'tax_type',
-            'fixed_price',
-            'product_price',
-            'cafe_product_code',
-          ],
-          ['id'],
-        )
-        .execute();
+    // for (let i = 0; i < goodsData.length; i++) {
+    //   const r = goodsData[i];
+    //   const productData = [
+    //     r.goodsNo[0],
+    //     r.goodsNm[0],
+    //     r.listImageData == undefined ? null : r.listImageData[0]._,
+    //     r.brandCd[0],
+    //     r.goodsCd[0],
+    //     r.modDt[0] == '' ? null : r.modDt[0],
+    //     r.trendNo[0] == '' ? null : r.trendNo[0],
+    //     r.originNm[0] == ''
+    //       ? null
+    //       : Object.keys(originData)[
+    //           Object.values(originData).indexOf(r.originNm[0])
+    //         ],
+    //     r.taxFreeFl[0],
+    //     Number(r.fixedPrice[0]) > 100000000 ? 0 : Number(r.fixedPrice[0]),
+    //     Number(r.goodsPrice[0]) > 100000000 ? 0 : Number(r.goodsPrice[0]),
+    //     r.cafe24ProductCode[0] == '' ? null : r.cafe24ProductCode[0],
+    //   ];
 
-      if (r.optionData) {
-        for (let j = 0; j < r.optionData.length; j++) {
-          const s = r.optionData[j];
+    //   await this.productsRepository
+    //     .createQueryBuilder()
+    //     .insert()
+    //     .into(Products, [
+    //       'id',
+    //       'name',
+    //       'image',
+    //       'brand_id',
+    //       'custom_product_id',
+    //       'updated_at',
+    //       'seller_id',
+    //       'production_country',
+    //       'tax_type',
+    //       'fixed_price',
+    //       'product_price',
+    //       'cafe_product_code',
+    //     ])
+    //     .values(productData)
+    //     .orUpdate(
+    //       [
+    //         'name',
+    //         'image',
+    //         'brand_id',
+    //         'custom_product_id',
+    //         'updated_at',
+    //         'seller_id',
+    //         'production_country',
+    //         'tax_type',
+    //         'fixed_price',
+    //         'product_price',
+    //         'cafe_product_code',
+    //       ],
+    //       ['id'],
+    //     )
+    //     .execute();
 
-          const optionData = [
-            s.sno[0],
-            s.optionCode[0],
-            s.optionValue1[0],
-            s.optionValue2[0],
-            s.optionValue3[0],
-            s.optionValue4[0],
-            r.goodsNo[0],
-            Number(s.optionPrice[0]),
-            s.modDt[0] == '' ? null : s.modDt[0],
-            s.cafe24OptionCode[0] == '' ? null : s.cafe24OptionCode[0],
-          ];
+    //   if (r.optionData) {
+    //     for (let j = 0; j < r.optionData.length; j++) {
+    //       const s = r.optionData[j];
 
-          await this.productVariantsRepository
-            .createQueryBuilder()
-            .insert()
-            .into(ProductVariants, [
-              'id',
-              'custom_variant_id',
-              'variant_color',
-              'variant_size',
-              'variant_etc1',
-              'variant_etc2',
-              'product_id',
-              'option_price',
-              'updated_at',
-              'cafe_variant_code',
-            ])
-            .values(optionData)
-            .orUpdate(
-              [
-                'custom_variant_id',
-                'variant_color',
-                'variant_size',
-                'variant_etc1',
-                'variant_etc2',
-                'product_id',
-                'option_price',
-                'updated_at',
-                'cafe_variant_code',
-              ],
-              ['id'],
-            )
-            .execute();
-        }
-      }
-    }
+    //       const optionData = [
+    //         s.sno[0],
+    //         s.optionCode[0],
+    //         s.optionValue1[0],
+    //         s.optionValue2[0],
+    //         s.optionValue3[0],
+    //         s.optionValue4[0],
+    //         r.goodsNo[0],
+    //         Number(s.optionPrice[0]),
+    //         s.modDt[0] == '' ? null : s.modDt[0],
+    //         s.cafe24OptionCode[0] == '' ? null : s.cafe24OptionCode[0],
+    //       ];
+
+    //       await this.productVariantsRepository
+    //         .createQueryBuilder()
+    //         .insert()
+    //         .into(ProductVariants, [
+    //           'id',
+    //           'custom_variant_id',
+    //           'variant_color',
+    //           'variant_size',
+    //           'variant_etc1',
+    //           'variant_etc2',
+    //           'product_id',
+    //           'option_price',
+    //           'updated_at',
+    //           'cafe_variant_code',
+    //         ])
+    //         .values(optionData)
+    //         .orUpdate(
+    //           [
+    //             'custom_variant_id',
+    //             'variant_color',
+    //             'variant_size',
+    //             'variant_etc1',
+    //             'variant_etc2',
+    //             'product_id',
+    //             'option_price',
+    //             'updated_at',
+    //             'cafe_variant_code',
+    //           ],
+    //           ['id'],
+    //         )
+    //         .execute();
+    //     }
+    //   }
+    // }
   }
 
-  async parseXml() {}
+  parseXml(xml) {
+    return new Promise((resolve, reject) => {
+      parseString(xml, (err, result) => {
+        return err ? reject(err) : resolve(result);
+      });
+    });
+  }
 }
