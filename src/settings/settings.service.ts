@@ -844,7 +844,7 @@ export class SettingsService {
     const xmlData = await lastValueFrom(xmlRowData);
     const jsonData = await this.parseXml(xmlData);
     console.log(jsonData);
-    const goodsData = jsonData.data.return[0].goods_data;
+    const goodsData = jsonData[0].data.return[0].goods_data;
 
     // if (goodsData == undefined || goodsData == null) {
     //   return 'No data';
