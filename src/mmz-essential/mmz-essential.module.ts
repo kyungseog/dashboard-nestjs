@@ -1,18 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { KoreaCoupons } from 'src/entities/korea-coupons.entity';
-import { KoreaExpenses } from 'src/entities/korea-expenses.entity';
-import { KoreaDeliveries } from 'src/entities/korea-deliveries.entity';
 import { KoreaMarketing } from 'src/entities/korea-marketing.entity';
-import { KoreaMileages } from 'src/entities/korea-mileages.entity';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { KoreaUsers } from 'src/entities/korea-users.entity';
 import { Products } from 'src/entities/products.entity';
 import { KoreaBudget } from 'src/entities/korea-budget.entity';
-import { Squads } from 'src/entities/squads.entity';
-import { KoreaIfdo } from 'src/entities/korea-ifdo.entity';
+import { DayKoreaBrands } from 'src/entities/day-korea-brands.entity';
+import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
+import { ProductEssentials } from 'src/entities/product-essentials.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
-import { KoreaLives } from 'src/entities/korea-lives.entity';
 import { EssentialController } from './mmz-essential.controller';
 import { EssentialService } from './mmz-essential.service';
 
@@ -22,16 +19,13 @@ import { EssentialService } from './mmz-essential.service';
       KoreaUsers,
       KoreaOrders,
       KoreaCoupons,
-      KoreaMileages,
-      KoreaDeliveries,
       KoreaMarketing,
-      KoreaExpenses,
       KoreaBudget,
       Products,
-      Squads,
-      KoreaIfdo,
       KoreaAllocationFees,
-      KoreaLives,
+      ProductEssentials,
+      DayKoreaBrands,
+      MonthKoreaBrands,
     ]),
   ],
   controllers: [EssentialController],

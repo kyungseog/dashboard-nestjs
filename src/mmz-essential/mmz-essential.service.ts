@@ -3,14 +3,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
+import { DayKoreaBrands } from 'src/entities/day-korea-brands.entity';
+import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
 import { Products } from 'src/entities/products.entity';
 import { Costs } from 'src/entities/costs.entity';
+import { ProductEssentials } from 'src/entities/product-essentials.entity';
 
 @Injectable()
 export class EssentialService {
   constructor(
     @InjectRepository(KoreaOrders)
     private koreaOrdersRepository: Repository<KoreaOrders>,
+    @InjectRepository(DayKoreaBrands)
+    private dayKoreaBrandsRepository: Repository<DayKoreaBrands>,
+    @InjectRepository(MonthKoreaBrands)
+    private monthKoreaBrandsRepository: Repository<MonthKoreaBrands>,
+    @InjectRepository(ProductEssentials)
+    private productEssentialsRepository: Repository<ProductEssentials>,
   ) {}
 
   salesQuery = this.koreaOrdersRepository
@@ -54,36 +63,6 @@ export class EssentialService {
     })
     .andWhere('orders.user_id != "mmzjapan"');
 
-  getSalesByHour(startDay: string, endDay: string) {
-    return this.salesQuery
-      .addSelect('DAY(orders.payment_date)', 'payment_day')
-      .addSelect('HOUR(orders.payment_date)', 'payment_hour')
-      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay,
-      })
-      .groupBy('DAY(payment_date), HOUR(payment_date)')
-      .getRawMany();
-  }
-
-  getSalesByDay(startDay: string, endDay: string) {
-    return this.salesQuery
-      .addSelect('DATE(orders.payment_date)', 'payment_date')
-      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay: DateTime.fromISO(endDay)
-          .plus({ days: 1 })
-          .toFormat('yyyy-LL-dd'),
-      })
-      .andWhere('orders.payment_date != :exceptDate', {
-        exceptDate: DateTime.fromISO(endDay)
-          .plus({ days: 1 })
-          .toFormat('yyyy-LL-dd 00:00:00'),
-      })
-      .groupBy('DATE(orders.payment_date)')
-      .getRawMany();
-  }
-
   getSalesByPeriod(startDay: string, endDay: string) {
     return this.salesQuery
       .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
@@ -98,6 +77,86 @@ export class EssentialService {
           .toFormat('yyyy-LL-dd 00:00:00'),
       })
       .getRawOne();
+  }
+
+  getSalesByHour(startDay: string, endDay: string) {
+    return this.salesQuery
+      .addSelect('DAY(orders.payment_date)', 'payment_day')
+      .addSelect('HOUR(orders.payment_date)', 'payment_hour')
+      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('DAY(payment_date), HOUR(payment_date)')
+      .getRawMany();
+  }
+
+  getSalesByWeek(startDay: string, endDay: string) {
+    return this.dayKoreaBrandsRepository
+      .createQueryBuilder('data')
+      .select('SUM(data.order_count)', 'order_count')
+      .addSelect('SUM(data.quantity)', 'quantity')
+      .addSelect('SUM(data.sales)', 'sales')
+      .addSelect('SUM(data.commission)', 'commission')
+      .addSelect('SUM(data.cost)', 'cost')
+      .addSelect('SUM(data.order_coupon)', 'order_coupon')
+      .addSelect('SUM(data.product_coupon)', 'product_coupon')
+      .addSelect('SUM(data.mileage)', 'mileage')
+      .addSelect('SUM(data.pg_fee)', 'pg_fee')
+      .addSelect('SUM(data.direct_marketing_fee)', 'direct_marketing_fee')
+      .addSelect('SUM(data.indirect_marketing_fee)', 'indirect_marketing_fee')
+      .addSelect('SUM(data.logistic_fee)', 'logistic_fee')
+      .addSelect('SUM(data.contribution_margin)', 'contribution_margin')
+      .addSelect('DATE_FORMAT(data.payment_date,"%Y-%v")', 'year_week')
+      .addSelect(
+        'CONCAT(DATE_FORMAT(DATE_ADD(data.payment_date, INTERVAL(2-DAYOFWEEK(data.payment_date)) DAY),"%Y/%m/%d")," - ",DATE_FORMAT(DATE_ADD(data.payment_date, INTERVAL(8-DAYOFWEEK(data.payment_date)) DAY),"%Y/%m/%d"))',
+        'date_range',
+      )
+      .where('data.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('data.brand_id = "B0000CAT"')
+      .groupBy('year_week')
+      .getRawMany();
+  }
+
+  getSalesByMonth(startDay: string, endDay: string) {
+    return this.salesQuery
+      .addSelect('DAY(orders.payment_date)', 'payment_day')
+      .addSelect('HOUR(orders.payment_date)', 'payment_hour')
+      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('DAY(payment_date), HOUR(payment_date)')
+      .getRawMany();
+  }
+
+  getSalesByDay(startDay: string, endDay: string) {
+    return this.dayKoreaBrandsRepository
+      .createQueryBuilder('data')
+      .select('data.payment_date', 'payment_date')
+      .addSelect('SUM(data.order_count)', 'order_count')
+      .addSelect('SUM(data.quantity)', 'quantity')
+      .addSelect('SUM(data.sales)', 'sales')
+      .addSelect('SUM(data.commission)', 'commission')
+      .addSelect('SUM(data.cost)', 'cost')
+      .addSelect('SUM(data.order_coupon)', 'order_coupon')
+      .addSelect('SUM(data.product_coupon)', 'product_coupon')
+      .addSelect('SUM(data.mileage)', 'mileage')
+      .addSelect('SUM(data.pg_fee)', 'pg_fee')
+      .addSelect('SUM(data.direct_marketing_fee)', 'direct_marketing_fee')
+      .addSelect('SUM(data.indirect_marketing_fee)', 'indirect_marketing_fee')
+      .addSelect('SUM(data.logistic_fee)', 'logistic_fee')
+      .addSelect('SUM(data.contribution_margin)', 'contribution_margin')
+      .where('data.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .andWhere('data.brand_id = "B0000CAT"')
+      .groupBy('payment_date')
+      .getRawMany();
   }
 
   getProductSalesPeriod(startDay: string, endDay: string) {

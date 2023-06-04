@@ -11,12 +11,16 @@ export class EssentialController {
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    if (sumType === 'period' || sumType == undefined) {
-      return await this.essentialService.getSalesByPeriod(startDay, endDay);
+    if (sumType === 'day') {
+      return await this.essentialService.getSalesByDay(startDay, endDay);
     } else if (sumType === 'hour') {
       return await this.essentialService.getSalesByHour(startDay, endDay);
+    } else if (sumType === 'week') {
+      return await this.essentialService.getSalesByWeek(startDay, endDay);
+    } else if (sumType === 'month') {
+      return await this.essentialService.getSalesByMonth(startDay, endDay);
     } else {
-      return await this.essentialService.getSalesByDay(startDay, endDay);
+      return await this.essentialService.getSalesByPeriod(startDay, endDay);
     }
   }
 
@@ -26,11 +30,8 @@ export class EssentialController {
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    if (sumType === 'period' || sumType == undefined) {
-      return await this.essentialService.getProductSalesPeriod(
-        startDay,
-        endDay,
-      );
+    if (sumType === 'day') {
+      return await this.essentialService.getProductSalesDay(startDay, endDay);
     } else if (sumType === 'hour') {
       return await this.essentialService.getProductSalesHour(startDay, endDay);
     } else if (sumType === 'hourPeriod') {
@@ -39,7 +40,10 @@ export class EssentialController {
         endDay,
       );
     } else {
-      return await this.essentialService.getProductSalesDay(startDay, endDay);
+      return await this.essentialService.getProductSalesPeriod(
+        startDay,
+        endDay,
+      );
     }
   }
 }
