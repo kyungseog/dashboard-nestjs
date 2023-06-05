@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { EssentialService } from './mmz-essential.service';
 
 @Controller('mmz-essential')
@@ -24,8 +24,16 @@ export class EssentialController {
     }
   }
 
+  @Get('/category')
+  async getCategorySales(
+    @Query('startDay') startDay: string,
+    @Query('endDay') endDay: string,
+  ): Promise<object> {
+    return await this.essentialService.getCategorySales(startDay, endDay);
+  }
+
   @Get('/product')
-  async getProductSalesTest(
+  async getProductSales(
     @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,

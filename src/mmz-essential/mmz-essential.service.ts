@@ -4,10 +4,10 @@ import { Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { KoreaOrders } from 'src/entities/korea-orders.entity';
 import { DayKoreaBrands } from 'src/entities/day-korea-brands.entity';
-import { MonthKoreaBrands } from 'src/entities/month-korea-brands.entity';
 import { Products } from 'src/entities/products.entity';
 import { Costs } from 'src/entities/costs.entity';
-import { ProductEssentials } from 'src/entities/product-essentials.entity';
+import { ProductEssentialsSales } from 'src/entities/product-essentials-sales.entity';
+import { ProductEssentialsProduction } from 'src/entities/product-essentials-production.entity';
 
 @Injectable()
 export class EssentialService {
@@ -16,10 +16,6 @@ export class EssentialService {
     private koreaOrdersRepository: Repository<KoreaOrders>,
     @InjectRepository(DayKoreaBrands)
     private dayKoreaBrandsRepository: Repository<DayKoreaBrands>,
-    @InjectRepository(MonthKoreaBrands)
-    private monthKoreaBrandsRepository: Repository<MonthKoreaBrands>,
-    @InjectRepository(ProductEssentials)
-    private productEssentialsRepository: Repository<ProductEssentials>,
   ) {}
 
   salesQuery = this.koreaOrdersRepository
@@ -54,7 +50,7 @@ export class EssentialService {
     .addSelect('product.image', 'image')
     .addSelect('SUM(orders.quantity)', 'quantity')
     .addSelect(
-      'SUM((orders.sale_price - orders.discount_price) * quantity)',
+      'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
       'sales_price',
     )
     .where('product.brand_id = "B0000CAT"')
@@ -156,6 +152,41 @@ export class EssentialService {
       })
       .andWhere('data.brand_id = "B0000CAT"')
       .groupBy('payment_date')
+      .getRawMany();
+  }
+
+  getCategorySales(startDay: string, endDay: string) {
+    return this.koreaOrdersRepository
+      .createQueryBuilder('orders')
+      .leftJoin(Products, 'product', 'orders.product_id = product.id')
+      .leftJoin(
+        ProductEssentialsSales,
+        'sales',
+        'orders.product_variant_id = sales.product_variant_id',
+      )
+      .leftJoin(
+        ProductEssentialsProduction,
+        'production',
+        'sales.barcode = production.barcode',
+      )
+      .select('production.age', 'age')
+      .addSelect('production.category', 'category')
+      .addSelect('SUM(orders.quantity)', 'quantity')
+      .addSelect(
+        'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
+        'sales_price',
+      )
+      .addSelect('SUM(orders.quantity * production.post_cost)', 'cost')
+      .where('product.brand_id = "B0000CAT"')
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .andWhere('orders.user_id != "mmzjapan"')
+      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
+        startDay,
+        endDay,
+      })
+      .groupBy('age, category')
       .getRawMany();
   }
 
