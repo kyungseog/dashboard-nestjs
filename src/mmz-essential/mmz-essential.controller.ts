@@ -24,6 +24,14 @@ export class EssentialController {
     }
   }
 
+  @Get('/season')
+  async getSeasonSales(
+    @Query('planYear') planYear: string,
+    @Query('season') season: string,
+  ): Promise<object> {
+    return await this.essentialService.getSeasonSales(planYear, season);
+  }
+
   @Get('/category')
   async getCategorySales(
     @Query('startDay') startDay: string,
@@ -34,24 +42,9 @@ export class EssentialController {
 
   @Get('/product')
   async getProductSales(
-    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    if (sumType === 'day') {
-      return await this.essentialService.getProductSalesDay(startDay, endDay);
-    } else if (sumType === 'hour') {
-      return await this.essentialService.getProductSalesHour(startDay, endDay);
-    } else if (sumType === 'hourPeriod') {
-      return await this.essentialService.getProductSalesHourPeriod(
-        startDay,
-        endDay,
-      );
-    } else {
-      return await this.essentialService.getProductSalesPeriod(
-        startDay,
-        endDay,
-      );
-    }
+    return await this.essentialService.getProductSales(startDay, endDay);
   }
 }

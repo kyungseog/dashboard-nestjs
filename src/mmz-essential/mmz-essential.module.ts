@@ -12,6 +12,7 @@ import { ProductEssentialsProduction } from 'src/entities/product-essentials-pro
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
 import { EssentialController } from './mmz-essential.controller';
 import { EssentialService } from './mmz-essential.service';
+import { Stocks } from 'src/entities/stocks.entity';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { EssentialService } from './mmz-essential.service';
       ProductEssentialsSales,
       ProductEssentialsProduction,
       DayKoreaBrands,
+      Stocks,
     ]),
   ],
   controllers: [EssentialController],

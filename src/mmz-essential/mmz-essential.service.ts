@@ -8,6 +8,7 @@ import { Products } from 'src/entities/products.entity';
 import { Costs } from 'src/entities/costs.entity';
 import { ProductEssentialsSales } from 'src/entities/product-essentials-sales.entity';
 import { ProductEssentialsProduction } from 'src/entities/product-essentials-production.entity';
+import { Stocks } from 'src/entities/stocks.entity';
 
 @Injectable()
 export class EssentialService {
@@ -16,6 +17,8 @@ export class EssentialService {
     private koreaOrdersRepository: Repository<KoreaOrders>,
     @InjectRepository(DayKoreaBrands)
     private dayKoreaBrandsRepository: Repository<DayKoreaBrands>,
+    @InjectRepository(ProductEssentialsProduction)
+    private productEssentialsProductionRepository: Repository<ProductEssentialsProduction>,
   ) {}
 
   salesQuery = this.koreaOrdersRepository
@@ -31,28 +34,6 @@ export class EssentialService {
       'sales_price',
     )
     .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')
-    .where('product.brand_id = "B0000CAT"')
-    .andWhere('orders.status_id IN (:...ids)', {
-      ids: ['p1', 'g1', 'd1', 'd2', 's1'],
-    })
-    .andWhere('orders.user_id != "mmzjapan"');
-
-  productQuery = this.koreaOrdersRepository
-    .createQueryBuilder('orders')
-    .leftJoin(Products, 'product', 'orders.product_id = product.id')
-    .leftJoin(
-      Costs,
-      'cost',
-      'orders.product_variant_id = cost.product_variant_id',
-    )
-    .select('product.id', 'product_id')
-    .addSelect('product.name', 'product_name')
-    .addSelect('product.image', 'image')
-    .addSelect('SUM(orders.quantity)', 'quantity')
-    .addSelect(
-      'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
-      'sales_price',
-    )
     .where('product.brand_id = "B0000CAT"')
     .andWhere('orders.status_id IN (:...ids)', {
       ids: ['p1', 'g1', 'd1', 'd2', 's1'],
@@ -155,6 +136,34 @@ export class EssentialService {
       .getRawMany();
   }
 
+  getSeasonSales(planYear: string, season: string) {
+    return this.productEssentialsProductionRepository
+      .createQueryBuilder('production')
+      .leftJoin(
+        ProductEssentialsSales,
+        'sales',
+        'production.barcode = sales.barcode',
+      )
+      .leftJoin(Stocks, 'stock', 'production.barcode = stock.barcode')
+      .select('production.age', 'age')
+      .addSelect('production.plan_year', 'plan_year')
+      .addSelect('production.category', 'category')
+      .addSelect('production.season', 'season')
+      .addSelect('production.color', 'color')
+      .addSelect('production.custom_cost_id', 'custom_cost_id')
+      .addSelect('sales.product_name', 'product_name')
+      .addSelect('SUM(production.in_quantity)', 'in_quantity')
+      .addSelect('SUM(stock.usable_quantity)', 'usable_quantity')
+      .addSelect(
+        'SUM(production.in_quantity) - SUM(stock.usable_quantity)',
+        'sales_quantity',
+      )
+      .andWhere('production.plan_year = :planYear', { planYear })
+      .andWhere('production.season = :season', { season })
+      .groupBy('production.custom_cost_id')
+      .getRawMany();
+  }
+
   getCategorySales(startDay: string, endDay: string) {
     return this.koreaOrdersRepository
       .createQueryBuilder('orders')
@@ -190,48 +199,34 @@ export class EssentialService {
       .getRawMany();
   }
 
-  getProductSalesPeriod(startDay: string, endDay: string) {
-    return this.productQuery
-      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay: DateTime.fromISO(endDay)
-          .plus({ days: 1 })
-          .toFormat('yyyy-LL-dd'),
+  getProductSales(startDay: string, endDay: string) {
+    return this.koreaOrdersRepository
+      .createQueryBuilder('orders')
+      .leftJoin(Products, 'product', 'orders.product_id = product.id')
+      .leftJoin(
+        ProductEssentialsSales,
+        'sales',
+        'orders.product_variant_id = sales.product_variant_id',
+      )
+      .leftJoin(
+        ProductEssentialsProduction,
+        'production',
+        'sales.barcode = production.barcode',
+      )
+      .select('product.id', 'product_id')
+      .addSelect('production.age', 'age')
+      .addSelect('product.name', 'product_name')
+      .addSelect('product.image', 'image')
+      .addSelect('SUM(orders.quantity)', 'quantity')
+      .addSelect(
+        'SUM((orders.sale_price - orders.discount_price) * orders.quantity)',
+        'sales_price',
+      )
+      .where('product.brand_id = "B0000CAT"')
+      .andWhere('orders.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
       })
-      .groupBy('product.id')
-      .orderBy('sales_price', 'DESC')
-      .getRawMany();
-  }
-
-  getProductSalesDay(startDay: string, endDay: string) {
-    return this.productQuery
-      .addSelect('DATE(orders.payment_date)', 'payment_date')
-      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay: DateTime.fromISO(endDay)
-          .plus({ days: 1 })
-          .toFormat('yyyy-LL-dd'),
-      })
-      .groupBy('product.id, DATE(orders.payment_date)')
-      .orderBy('sales_price', 'DESC')
-      .getRawMany();
-  }
-
-  getProductSalesHour(startDay: string, endDay: string) {
-    return this.productQuery
-      .addSelect('DAY(orders.payment_date)', 'payment_day')
-      .addSelect('HOUR(orders.payment_date)', 'payment_hour')
-      .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
-        startDay,
-        endDay,
-      })
-      .groupBy('product.id, HOUR(payment_date)')
-      .orderBy('sales_price', 'DESC')
-      .getRawMany();
-  }
-
-  getProductSalesHourPeriod(startDay: string, endDay: string) {
-    return this.productQuery
+      .andWhere('orders.user_id != "mmzjapan"')
       .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
         endDay,
