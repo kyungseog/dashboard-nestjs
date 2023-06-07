@@ -152,6 +152,7 @@ export class EssentialService {
       .addSelect('production.color', 'color')
       .addSelect('production.custom_cost_id', 'custom_cost_id')
       .addSelect('sales.product_name', 'product_name')
+      .addSelect('production.first_sale_date', 'first_sale_date')
       .addSelect('SUM(production.in_quantity)', 'in_quantity')
       .addSelect('SUM(stock.usable_quantity)', 'usable_quantity')
       .addSelect(
@@ -193,7 +194,9 @@ export class EssentialService {
       .andWhere('orders.user_id != "mmzjapan"')
       .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
-        endDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .groupBy('age, category')
       .getRawMany();
@@ -229,7 +232,9 @@ export class EssentialService {
       .andWhere('orders.user_id != "mmzjapan"')
       .andWhere('orders.payment_date BETWEEN :startDay AND :endDay', {
         startDay,
-        endDay,
+        endDay: DateTime.fromISO(endDay)
+          .plus({ days: 1 })
+          .toFormat('yyyy-LL-dd'),
       })
       .groupBy('product.id')
       .orderBy('sales_price', 'DESC')

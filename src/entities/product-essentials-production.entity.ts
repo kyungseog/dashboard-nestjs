@@ -40,4 +40,7 @@ export class ProductEssentialsProduction extends BaseEntity {
 
   @Column('char', { length: 50, nullable: true })
   material: string;
+
+  @Column('date', { nullable: true })
+  first_sale_date: Date;
 }
