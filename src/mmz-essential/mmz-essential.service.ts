@@ -145,11 +145,13 @@ export class EssentialService {
         'production.barcode = sales.barcode',
       )
       .leftJoin(Stocks, 'stock', 'production.barcode = stock.barcode')
+      .leftJoin(Products, 'product', 'sales.product_id = product.id')
       .select('production.age', 'age')
       .addSelect('production.plan_year', 'plan_year')
       .addSelect('production.category', 'category')
       .addSelect('production.season', 'season')
       .addSelect('production.color', 'color')
+      .addSelect('product.image', 'image')
       .addSelect('production.custom_cost_id', 'custom_cost_id')
       .addSelect('sales.product_name', 'product_name')
       .addSelect('production.first_sale_date', 'first_sale_date')
