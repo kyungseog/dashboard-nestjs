@@ -8,7 +8,8 @@ import { Products } from 'src/entities/products.entity';
 import { KoreaBudget } from 'src/entities/korea-budget.entity';
 import { DayKoreaBrands } from 'src/entities/day-korea-brands.entity';
 import { ProductEssentialsSales } from 'src/entities/product-essentials-sales.entity';
-import { ProductEssentialsProduction } from 'src/entities/product-essentials-production.entity';
+import { ProductEssentialsProducts } from 'src/entities/product-essentials-products.entity';
+import { ProductEssentialsVariants } from 'src/entities/product-essentials-variants.entity';
 import { KoreaAllocationFees } from 'src/entities/korea-allocation-fees.entity';
 import { EssentialController } from './mmz-essential.controller';
 import { EssentialService } from './mmz-essential.service';
@@ -25,7 +26,8 @@ import { Stocks } from 'src/entities/stocks.entity';
       Products,
       KoreaAllocationFees,
       ProductEssentialsSales,
-      ProductEssentialsProduction,
+      ProductEssentialsProducts,
+      ProductEssentialsVariants,
       DayKoreaBrands,
       Stocks,
     ]),

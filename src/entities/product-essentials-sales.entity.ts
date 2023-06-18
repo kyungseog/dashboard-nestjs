@@ -15,8 +15,11 @@ export class ProductEssentialsSales extends BaseEntity {
   variant_cost: number;
 
   @Column('varchar', { nullable: true })
-  product_name: string;
+  product_sales_name: string;
 
   @PrimaryColumn('varchar', { length: 100 })
   barcode: string;
+
+  @Column('varchar', { length: 100, nullable: true })
+  custom_product_id: string;
 }

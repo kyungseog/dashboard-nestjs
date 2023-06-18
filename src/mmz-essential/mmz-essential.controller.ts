@@ -24,27 +24,19 @@ export class EssentialController {
     }
   }
 
-  @Get('/season')
-  async getSeasonSales(
-    @Query('planYear') planYear: string,
-    @Query('season') season: string,
-  ): Promise<object> {
-    return await this.essentialService.getSeasonSales(planYear, season);
-  }
-
-  @Get('/category')
-  async getCategorySales(
-    @Query('startDay') startDay: string,
-    @Query('endDay') endDay: string,
-  ): Promise<object> {
-    return await this.essentialService.getCategorySales(startDay, endDay);
-  }
-
   @Get('/product')
   async getProductSales(
+    @Query('sumType') sumType: string,
     @Query('startDay') startDay: string,
     @Query('endDay') endDay: string,
   ): Promise<object> {
-    return await this.essentialService.getProductSales(startDay, endDay);
+    if (sumType === 'stock') {
+      return await this.essentialService.getProductSalesByStock();
+    } else {
+      return await this.essentialService.getProductSalesBySale(
+        startDay,
+        endDay,
+      );
+    }
   }
 }

@@ -1,15 +1,18 @@
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class ProductEssentialsProduction extends BaseEntity {
+export class ProductEssentialsVariants extends BaseEntity {
   @PrimaryColumn('varchar', { length: 100 })
   barcode: string;
 
-  @Column('varchar', { length: 100, nullable: true })
+  @Column('varchar', { length: 100 })
   custom_variant_id: string;
 
   @PrimaryColumn('varchar', { length: 100 })
   custom_cost_id: string;
+
+  @Column('varchar', { length: 100, nullable: true })
+  custom_product_id: string;
 
   @Column('int', { nullable: true })
   pre_cost: number;
@@ -25,22 +28,4 @@ export class ProductEssentialsProduction extends BaseEntity {
 
   @Column('char', { length: 50, nullable: true })
   size: string;
-
-  @Column('char', { length: 50, nullable: true })
-  age: string;
-
-  @Column('char', { length: 50, nullable: true })
-  category: string;
-
-  @Column('char', { length: 10, nullable: true })
-  plan_year: string;
-
-  @Column('char', { length: 50, nullable: true })
-  season: string;
-
-  @Column('char', { length: 50, nullable: true })
-  material: string;
-
-  @Column('date', { nullable: true })
-  first_sale_date: Date;
 }
