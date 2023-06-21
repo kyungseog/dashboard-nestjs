@@ -33,10 +33,7 @@ export class ProductEssentialsProducts extends BaseEntity {
   plan_year: string;
 
   @Column('int', { nullable: true })
-  fixed_price: number;
-
-  @Column('int', { nullable: true })
-  sales_price: number;
+  selling_price: number;
 
   @Column('date', { nullable: true })
   first_sale_date: Date;
