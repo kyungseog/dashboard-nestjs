@@ -13,7 +13,7 @@ export class Brands extends BaseEntity {
   account_type: BrandType;
 
   @Column('char', { nullable: true, length: 100 })
-  design_type: string;
+  class_type: string;
 
   @Column('char', { length: 50 })
   sales_country: string;
@@ -27,6 +27,9 @@ export class Brands extends BaseEntity {
   @Column('char', { length: 10 })
   supplier_id: string;
 
+  @Column('varchar', { nullable: true, length: 100 })
+  supplier_md_email: string;
+
   @Column('char', { length: 10 })
   commission: string;
 
@@ -38,4 +41,7 @@ export class Brands extends BaseEntity {
 
   @Column({ type: 'enum', enum: SupplierStatus })
   status_id: SupplierStatus;
+
+  @Column('varchar', { nullable: true, length: 100 })
+  profit_cell: string;
 }
