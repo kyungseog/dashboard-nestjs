@@ -35,6 +35,7 @@ export class BrandService {
     .addSelect('brand.account_type', 'brand_type')
     .addSelect('brand.squad', 'brand_squad')
     .addSelect('brand.manager_id', 'md_id')
+    .addSelect('brand.profit_cell', 'profit_cell')
     .addSelect('supplier.id', 'supplier_id')
     .addSelect('supplier.integration_name', 'supplier_name')
     .addSelect('COUNT(DISTINCT(orders.id))', 'order_count')

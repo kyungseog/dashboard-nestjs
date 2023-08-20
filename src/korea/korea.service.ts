@@ -22,6 +22,7 @@ export class KoreaService {
     return this.koreaOrdersRepository
       .createQueryBuilder()
       .select('DATE(payment_date)', 'payment_date')
+      .addSelect('WEEK(payment_date,7)', 'weeks')
       .addSelect('SUM((sale_price - discount_price) * quantity)', 'sales_price')
       .addSelect('COUNT(DISTINCT(id))', 'order_count')
       .where('payment_date BETWEEN :startDay AND :endDay', {
