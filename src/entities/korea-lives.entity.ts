@@ -9,7 +9,7 @@ export class KoreaLives extends BaseEntity {
   campaign_key: string;
 
   @Column('varchar')
-  name: string;
+  live_name: string;
 
   @Column('char', { length: 10, nullable: true })
   brand_id: string;

@@ -33,6 +33,7 @@ export class LiveCommercesService {
     const salesData = await this.koreaOrdersRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect(Products, 'product', 'order.product_id = product.id')
+      .leftJoinAndSelect(Brands, 'brand', 'product.brand_id = brand.id')
       .where('product.brand_id = :brand_id', { brand_id: brand_id })
       .andWhere(
         'order.payment_date BETWEEN :start_datetime AND :end_datetime',
