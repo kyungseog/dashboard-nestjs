@@ -12,6 +12,11 @@ export class LiveCommercesController {
     return this.liveCommercesService.getLiveSales(liveSales);
   }
 
+  @Get('/interval-sales')
+  getIntervalLiveSales(@Query() liveSales): Promise<KoreaOrders[]> {
+    return this.liveCommercesService.getIntervalLiveSales(liveSales);
+  }
+
   @Get('/:start_date')
   getLiveCommerce(@Param('start_date') start_date: Date): Promise<KoreaLives> {
     return this.liveCommercesService.getLiveCommerce(start_date);

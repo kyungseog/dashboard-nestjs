@@ -51,4 +51,37 @@ export class LiveCommercesService {
     }
     return salesData;
   }
+
+  async getIntervalLiveSales(liveSales): Promise<KoreaOrders[]> {
+    const { brand_id, start_datetime, end_datetime } = liveSales;
+    const salesData = await this.koreaOrdersRepository
+      .createQueryBuilder('order')
+      .leftJoin(Products, 'product', 'order.product_id = product.id')
+      .select('HOUR(order.payment_date)', 'hours')
+      .addSelect('FLOOR(MINUTE(order.payment_date)/10)*10', 'minutes')
+      .addSelect(
+        'SUM((order.sale_price - order.discount_price) * order.quantity)',
+        'sales_price',
+      )
+      .addSelect('COUNT(DISTINCT(order.id))', 'order_count')
+      .where('product.brand_id = :brand_id', { brand_id: brand_id })
+      .andWhere(
+        'order.payment_date BETWEEN :start_datetime AND :end_datetime',
+        {
+          start_datetime: start_datetime,
+          end_datetime: end_datetime,
+        },
+      )
+      .andWhere('order.status_id IN (:...ids)', {
+        ids: ['p1', 'g1', 'd1', 'd2', 's1'],
+      })
+      .groupBy(
+        'HOUR(order.payment_date), FLOOR(MINUTE(order.payment_date)/10)*10',
+      )
+      .getRawMany();
+    if (!salesData) {
+      throw new NotFoundException(`can't find live sales datas`);
+    }
+    return salesData;
+  }
 }
